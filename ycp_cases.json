@@ -1,0 +1,62 @@
+[
+    {
+        "case_name": "launcher_test",
+        "path": ".\\tests\\YCP\\fake_test.py",
+        "class": "Test",
+        "cases": [
+            "launcher_test_1",
+            "launcher_test_2",
+            "launcher_test_3"
+        ]
+    },
+    {
+        "case_name": "edit_test",
+        "path": ".\\tests\\YCP\\fake_test2.py",
+        "class": "Test",
+        "cases": [
+            "edit_test_1",
+            "edit_test_2",
+            "edit_test_3"
+        ]
+    },
+    {
+        "case_name": "cam_test",
+        "path": ".\\tests\\YCP\\fake_test2.py",
+        "class": "Test",
+        "cases": [
+            "cam_test_1",
+            "cam_test_2",
+            "cam_test_3"
+        ]
+    },
+    {
+        "case_name": "store_test",
+        "path": ".\\tests\\YCP\\fake_test2.py",
+        "class": "Test",
+        "cases": [
+            "store_test_1",
+            "store_test_2",
+            "store_test_3"
+        ]
+    },
+    {
+        "case_name": "web_test",
+        "path": ".\\tests\\YCP\\fake_test2.py",
+        "class": "Test",
+        "cases": [
+            "web_test_1",
+            "web_test_2",
+            "web_test_3"
+        ]
+    },
+    {
+        "case_name": "fake_test",
+        "path": ".\\tests\\YCP\\fake_test2.py",
+        "class": "Test",
+        "cases": [
+            "fake_test_1",
+            "fake_test_2",
+            "fake_test_3"
+        ]
+    }
+]
