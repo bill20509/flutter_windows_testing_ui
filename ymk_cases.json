@@ -1,6 +1,6 @@
 [
     {
-        "case_name": "ycp_launcher_test",
+        "case_name": "ymk_launcher_test",
         "path": ".\\tests\\YCP\\fake_test.py",
         "class": "Test",
         "cases": [
@@ -10,7 +10,7 @@
         ]
     },
     {
-        "case_name": "ycp_edit_test",
+        "case_name": "ymk_edit_test",
         "path": ".\\tests\\YCP\\fake_test2.py",
         "class": "Test",
         "cases": [
@@ -20,7 +20,7 @@
         ]
     },
     {
-        "case_name": "ycp_cam_test",
+        "case_name": "ymk_cam_test",
         "path": ".\\tests\\YCP\\fake_test2.py",
         "class": "Test",
         "cases": [
@@ -30,33 +30,13 @@
         ]
     },
     {
-        "case_name": "ycp_store_test",
+        "case_name": "ymk_store_test",
         "path": ".\\tests\\YCP\\fake_test2.py",
         "class": "Test",
         "cases": [
             "store_test_1",
             "store_test_2",
             "store_test_3"
-        ]
-    },
-    {
-        "case_name": "ycp_web_test",
-        "path": ".\\tests\\YCP\\fake_test2.py",
-        "class": "Test",
-        "cases": [
-            "web_test_1",
-            "web_test_2",
-            "web_test_3"
-        ]
-    },
-    {
-        "case_name": "ycp_fake_test",
-        "path": ".\\tests\\YCP\\fake_test2.py",
-        "class": "Test",
-        "cases": [
-            "fake_test_1",
-            "fake_test_2",
-            "fake_test_3"
         ]
     }
 ]
