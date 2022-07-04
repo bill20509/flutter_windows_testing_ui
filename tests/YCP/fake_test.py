@@ -8,7 +8,7 @@ class Test(object):
         print('setup')
 
     def test_1(self):
-        assert 1 == 1
+        assert 1 == 2
 
     def test_2(self):
         assert 1 == 1

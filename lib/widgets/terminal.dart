@@ -18,7 +18,10 @@ class LocalTerminalBackend extends TerminalBackend {
   }
 
   @override
-  Stream<String> get out => pty.out;
+  Stream<String> get out {
+    // TODO: implement out
+    throw UnimplementedError();
+  }
 
   @override
   void resize(int width, int height, int pixelWidth, int pixelHeight) {

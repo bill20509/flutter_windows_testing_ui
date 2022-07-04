@@ -51,12 +51,20 @@ class _MyHomePageState extends State<MyHomePage> {
   void _runTest() {
     if (queue2.isEmpty) return;
     setState(() {
-      String test_command = "";
+      String test_command = "python3 maintest.py ";
       for (var i in queue2) {
-        test_command = test_command + i.name + " ";
+        for (var j in i.cases) {
+          if (j["isChecked"]) {
+            test_command = test_command + i.path + "::Test::" + j["name"] + " ";
+          }
+        }
       }
-      pty.write("echo run ${test_command}\r");
+      pty.write("${test_command}\r");
     });
+  }
+
+  void _parse() {
+    pty.write("python3 parse.py\r");
   }
 
   void _loadTestCase() {
@@ -64,12 +72,12 @@ class _MyHomePageState extends State<MyHomePage> {
     queue2 = [];
     String contents = "";
     if (mode == 0) {
-      contents = new File('./ycp_cases.json').readAsStringSync();
+      contents = new File('./YCP_cases.json').readAsStringSync();
     } else if (mode == 1) {
-      contents = new File('./ymk_cases.json').readAsStringSync();
+      contents = new File('./YMK_cases.json').readAsStringSync();
     }
     List<dynamic> test_cases = jsonDecode(contents);
-    print(test_cases);
+    // print(test_cases);
     for (var i in test_cases) {
       // print(i["case_name"]);
       List<Map> temp_list_map = [];
@@ -86,6 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    _parse();
     _loadTestCase();
     super.initState();
   }
@@ -162,10 +171,10 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(8.0),
             child: IconButton(
               icon: const Icon(Icons.change_circle),
-              tooltip: 'Reset',
+              tooltip: 'Reload',
               onPressed: () {
                 setState(() {
-                  _loadTestCase();
+                  _parse();
                 });
               },
             ),

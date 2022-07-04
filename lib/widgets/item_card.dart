@@ -21,6 +21,7 @@ class itemCard extends StatefulWidget {
 
 class _itemCardState extends State<itemCard> {
   bool display = false;
+  bool isChecked = true;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -59,6 +60,21 @@ class _itemCardState extends State<itemCard> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                  ),
+                  Checkbox(
+                    checkColor: Colors.white,
+                    value: isChecked,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        for (var i = 0;
+                            i < widget.q1[widget.index].cases.length;
+                            i++) {
+                          widget.q1[widget.index].cases[i]['isChecked'] = value;
+                        }
+
+                        isChecked = value!;
+                      });
+                    },
                   ),
                   IconButton(
                     onPressed: () {
