@@ -19,8 +19,7 @@ class LocalTerminalBackend extends TerminalBackend {
 
   @override
   Stream<String> get out {
-    // TODO: implement out
-    throw UnimplementedError();
+    return pty.out;
   }
 
   @override
