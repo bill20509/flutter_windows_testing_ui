@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         }
       }
-      pty.write("${test_command}\r");
+      pty.write("${test_command} \r");
     });
   }
 

@@ -16,6 +16,9 @@ class Test(object):
     def test_3(self):
         assert 1 == 1
 
+    def test_4(self):
+        assert 1 == 4
+
     def teardown_method(self):  # quit driver when test case done
         time.sleep(1)
         print('quit')
