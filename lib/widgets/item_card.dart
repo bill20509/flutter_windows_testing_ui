@@ -77,6 +77,9 @@ class _itemCardState extends State<itemCard> {
 
                         isChecked = value!;
                       });
+                      widget.parentSetState(() {
+                        refreshList(widget.q1, widget.q2);
+                      });
                     },
                   ),
                   IconButton(
@@ -99,6 +102,7 @@ class _itemCardState extends State<itemCard> {
                         onChanged: (newValue) {
                           widget.parentSetState(() {
                             item["isChecked"] = newValue;
+                            refreshList(widget.q1, widget.q2);
                           });
                         },
                       );
@@ -110,4 +114,29 @@ class _itemCardState extends State<itemCard> {
       ),
     );
   }
+}
+
+void refreshList(
+  List<TestCase> q1,
+  List<TestCase> q2,
+) {
+  q2.clear();
+  for (final testCase in q1) {
+    final List<Map> cases = [];
+    for (final i in testCase.cases) {
+      if (i["isChecked"]) {
+        cases.add(i);
+      }
+    }
+    TestCase temp = TestCase(
+      testCase.name,
+      testCase.path,
+      cases,
+    );
+    if (cases.length != 0) {
+      q2.add(temp);
+    }
+  }
+  print('q1 legnth: ${q1.length}');
+  print('q2 legnth: ${q2.length}');
 }

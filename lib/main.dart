@@ -107,6 +107,56 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           Container(
             decoration: BoxDecoration(
+              color: Color.fromARGB(255, 72, 68, 72),
+              gradient: LinearGradient(
+                colors: <Color>[
+                  Color.fromARGB(255, 72, 68, 72),
+                  Color.fromARGB(255, 30, 4, 22),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            padding: const EdgeInsets.all(8.0),
+            child: TextButton(
+              child: Text(
+                'Import Preset',
+                overflow: TextOverflow.ellipsis,
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.all(16.0),
+                primary: Colors.white,
+                textStyle: const TextStyle(fontSize: 15),
+              ),
+              onPressed: () => print(123),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Color.fromARGB(255, 6, 222, 63),
+              gradient: LinearGradient(
+                colors: <Color>[
+                  Color.fromARGB(255, 6, 222, 63),
+                  Color.fromARGB(255, 181, 216, 5),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            padding: const EdgeInsets.all(8.0),
+            child: TextButton(
+              child: Text(
+                'Save Preset',
+                overflow: TextOverflow.ellipsis,
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.all(16.0),
+                primary: Colors.white,
+                textStyle: const TextStyle(fontSize: 15),
+              ),
+              onPressed: () => print(123),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
               color: Colors.purple,
               gradient: LinearGradient(
                 colors: <Color>[
@@ -234,7 +284,6 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   final ScrollController _firstController = ScrollController();
   final ScrollController _secondController = ScrollController();
-  List<Bool> displayCheckList = [];
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -273,20 +322,34 @@ class _BodyState extends State<Body> {
           ),
           SizedBox(
             width: constraints.maxWidth / 5,
-            child: Scrollbar(
-              controller: _secondController,
-              isAlwaysShown: true,
-              child: ListView.builder(
-                  controller: _secondController,
-                  itemCount: widget.q2.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return itemCard(
-                      parentSetState: setState,
-                      q1: widget.q2,
-                      q2: widget.q1,
-                      index: index,
-                    );
-                  }),
+            child: Column(
+              children: [
+                Builder(builder: (BuildContext ctx) => Text('123')),
+                Expanded(
+                  child: Scrollbar(
+                    controller: _secondController,
+                    isAlwaysShown: true,
+                    child: ListView.builder(
+                      controller: _secondController,
+                      itemCount: widget.q2.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Card(
+                          child: ListTile(
+                            title: Text(widget.q2[index].name),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (final run_case in widget.q2[index].cases)
+                                  Text('- ${run_case['name']}'),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           VerticalDivider(
