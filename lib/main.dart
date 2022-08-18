@@ -286,6 +286,7 @@ class _BodyState extends State<Body> {
   final ScrollController _secondController = ScrollController();
   @override
   Widget build(BuildContext context) {
+    refreshList(widget.q1, widget.q2);
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
       return Row(
@@ -324,7 +325,15 @@ class _BodyState extends State<Body> {
             width: constraints.maxWidth / 5,
             child: Column(
               children: [
-                Builder(builder: (BuildContext ctx) => Text('123')),
+                Builder(builder: (BuildContext ctx) {
+                  int count = 0;
+                  for (final item in widget.q2) {
+                    for (final item2 in item.cases) {
+                      count += 1;
+                    }
+                  }
+                  return Text('Running cases: $count');
+                }),
                 Expanded(
                   child: Scrollbar(
                     controller: _secondController,
@@ -366,5 +375,28 @@ class _BodyState extends State<Body> {
         ],
       );
     });
+  }
+}
+
+void refreshList(
+  List<TestCase> q1,
+  List<TestCase> q2,
+) {
+  q2.clear();
+  for (final testCase in q1) {
+    final List<Map> cases = [];
+    for (final i in testCase.cases) {
+      if (i["isChecked"]) {
+        cases.add(i);
+      }
+    }
+    TestCase temp = TestCase(
+      testCase.name,
+      testCase.path,
+      cases,
+    );
+    if (cases.length != 0) {
+      q2.add(temp);
+    }
   }
 }
