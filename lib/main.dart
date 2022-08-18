@@ -1,4 +1,4 @@
-import 'dart:ffi';
+import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
 import 'package:example/widgets/item_card.dart';
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Demo Page'),
+      home: const MyHomePage(title: 'UI Testing Tool'),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -67,24 +67,22 @@ class _MyHomePageState extends State<MyHomePage> {
     pty.write("python3 parse.py\r");
   }
 
-  void _loadTestCase() {
+  void _loadTestCase(bool checked) {
     queue1 = [];
     queue2 = [];
     String contents = "";
     if (mode == 0) {
-      contents = new File('./YCP_cases.json').readAsStringSync();
+      contents = File('./YCP_cases.json').readAsStringSync();
     } else if (mode == 1) {
-      contents = new File('./YMK_cases.json').readAsStringSync();
+      contents = File('./YMK_cases.json').readAsStringSync();
     }
     List<dynamic> test_cases = jsonDecode(contents);
-    // print(test_cases);
     for (var i in test_cases) {
-      // print(i["case_name"]);
       List<Map> temp_list_map = [];
       for (var j in i["cases"]) {
         temp_list_map.add({
           "name": j,
-          "isChecked": true,
+          "isChecked": checked,
         });
       }
       TestCase temp = TestCase(i["case_name"], i["path"], temp_list_map);
@@ -95,7 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     _parse();
-    _loadTestCase();
+    _loadTestCase(true);
+    refreshList(queue1, queue2);
     super.initState();
   }
 
@@ -127,7 +126,44 @@ class _MyHomePageState extends State<MyHomePage> {
                 primary: Colors.white,
                 textStyle: const TextStyle(fontSize: 15),
               ),
-              onPressed: () => print(123),
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['json'],
+                );
+                if (result?.files.single.path != null) {
+                  String file =
+                      File("${result?.files.single.path}").readAsStringSync();
+                  try {
+                    Map<String, dynamic> testCases = jsonDecode(file);
+
+                    setState(() {
+                      mode = testCases['mode'];
+                      _loadTestCase(false);
+                      List<dynamic> cases = testCases['testCases'];
+                      for (final item in cases) {
+                        for (int i = 0; i < queue1.length; i++) {
+                          if (queue1[i].name == item['name']) {
+                            for (int j = 0;
+                                j < (item['cases'] as List).length;
+                                j++) {
+                              for (int k = 0; k < queue1[i].cases.length; k++) {
+                                if (queue1[i].cases[k]['name'] ==
+                                    item['cases'][j]['name']) {
+                                  queue1[i].cases[k]['isChecked'] = true;
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      refreshList(queue1, queue2);
+                    });
+                  } catch (e) {
+                    print(e);
+                  }
+                }
+              },
             ),
           ),
           Container(
@@ -152,7 +188,42 @@ class _MyHomePageState extends State<MyHomePage> {
                 primary: Colors.white,
                 textStyle: const TextStyle(fontSize: 15),
               ),
-              onPressed: () => print(123),
+              onPressed: () async {
+                String? outputFile = await FilePicker.platform.saveFile(
+                  dialogTitle: 'Please select an output file:',
+                  fileName: 'preset.json',
+                  type: FileType.custom,
+                  allowedExtensions: ['json'],
+                );
+                if (outputFile == null) {
+                  return;
+                  // User canceled the picker
+                }
+                setState(
+                  () {
+                    Map<String, dynamic> saveFile = {
+                      'mode': 0,
+                      'testCases': []
+                    };
+                    for (var i = 0; i < queue2.length; i++) {
+                      Map<String, dynamic> temp_map = {};
+                      temp_map['name'] = queue2[i].name;
+                      temp_map['path'] = queue2[i].path;
+                      temp_map['class'] = 'Test';
+                      var temp_list = [];
+                      for (final item in queue2[i].cases) {
+                        temp_list.add(item);
+                      }
+                      temp_map['cases'] = temp_list;
+                      saveFile['testCases'].add(temp_map);
+                    }
+                    var content = jsonEncode(saveFile);
+
+                    var file = File(outputFile);
+                    file.writeAsString(jsonEncode(saveFile));
+                  },
+                );
+              },
             ),
           ),
           Container(
@@ -180,7 +251,8 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 setState(() {
                   mode = 0;
-                  _loadTestCase();
+                  _loadTestCase(true);
+                  refreshList(queue1, queue2);
                 });
               },
             ),
@@ -209,7 +281,8 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 setState(() {
                   mode = 1;
-                  _loadTestCase();
+                  _loadTestCase(true);
+                  refreshList(queue1, queue2);
                 });
               },
             ),
@@ -225,21 +298,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 setState(() {
                   _parse();
-                });
-              },
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Color.fromARGB(255, 105, 99, 99),
-            ),
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-              icon: const Icon(Icons.save),
-              tooltip: 'Save',
-              onPressed: () {
-                setState(() {
-                  _loadTestCase();
+                  refreshList(queue1, queue2);
                 });
               },
             ),
@@ -264,6 +323,29 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+void refreshList(
+  List<TestCase> q1,
+  List<TestCase> q2,
+) {
+  q2.clear();
+  for (final testCase in q1) {
+    final List<Map> cases = [];
+    for (final i in testCase.cases) {
+      if (i["isChecked"]) {
+        cases.add(i);
+      }
+    }
+    TestCase temp = TestCase(
+      testCase.name,
+      testCase.path,
+      cases,
+    );
+    if (cases.length != 0) {
+      q2.add(temp);
+    }
   }
 }
 
@@ -293,13 +375,24 @@ class _BodyState extends State<Body> {
         children: <Widget>[
           Column(
             children: [
-              SizedBox(
-                width: constraints.maxWidth / 5,
-                height: constraints.maxHeight * 0.95,
-                child: Scrollbar(
-                  controller: _firstController,
-                  isAlwaysShown: true,
-                  child: ListView.builder(
+              Builder(
+                builder: (BuildContext ctx) {
+                  int count = 0;
+                  for (final item in widget.q1) {
+                    for (final item2 in item.cases) {
+                      count += 1;
+                    }
+                  }
+                  return Text('Total Cases: $count');
+                },
+              ),
+              Expanded(
+                child: SizedBox(
+                  width: constraints.maxWidth / 5,
+                  height: constraints.maxHeight * 0.95,
+                  child: Scrollbar(
+                    controller: _firstController,
+                    child: ListView.builder(
                       controller: _firstController,
                       itemCount: widget.q1.length,
                       itemBuilder: (BuildContext context, int index) {
@@ -309,7 +402,9 @@ class _BodyState extends State<Body> {
                           q2: widget.q2,
                           index: index,
                         );
-                      }),
+                      },
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -337,7 +432,6 @@ class _BodyState extends State<Body> {
                 Expanded(
                   child: Scrollbar(
                     controller: _secondController,
-                    isAlwaysShown: true,
                     child: ListView.builder(
                       controller: _secondController,
                       itemCount: widget.q2.length,
@@ -375,28 +469,5 @@ class _BodyState extends State<Body> {
         ],
       );
     });
-  }
-}
-
-void refreshList(
-  List<TestCase> q1,
-  List<TestCase> q2,
-) {
-  q2.clear();
-  for (final testCase in q1) {
-    final List<Map> cases = [];
-    for (final i in testCase.cases) {
-      if (i["isChecked"]) {
-        cases.add(i);
-      }
-    }
-    TestCase temp = TestCase(
-      testCase.name,
-      testCase.path,
-      cases,
-    );
-    if (cases.length != 0) {
-      q2.add(temp);
-    }
   }
 }
