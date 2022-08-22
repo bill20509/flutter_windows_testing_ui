@@ -1,3 +1,6 @@
+import 'dart:isolate';
+
+import 'package:example/widgets/fail_icon.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
@@ -10,6 +13,8 @@ import 'models/test_case.dart';
 import 'package:xterm/xterm.dart';
 import 'widgets/terminal.dart';
 import 'dart:convert';
+import 'package:badges/badges.dart';
+import 'package:flutter_json_viewer/flutter_json_viewer.dart';
 
 void main() {
   runApp(MyApp());
@@ -38,20 +43,46 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+void refreshList(
+  List<TestCase> q1,
+  List<TestCase> q2,
+) {
+  q2.clear();
+  for (final testCase in q1) {
+    final List<Map> cases = [];
+    for (final i in testCase.cases) {
+      if (i["isChecked"]) {
+        cases.add(i);
+      }
+    }
+    TestCase temp = TestCase(
+      testCase.name,
+      testCase.path,
+      cases,
+    );
+    if (cases.length != 0) {
+      q2.add(temp);
+    }
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   List<TestCase> queue1 = [];
   List<TestCase> queue2 = [];
+  late TextEditingController _controller;
+  late String pythonName;
+  int failCount = 0;
+  String tempJsonFileName = 'FILE';
   int mode = 0; // 0 -> YCP, 1 -> YMK
   final pty = PseudoTerminal.start(
     r'C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe',
     [''],
     environment: {'TERM': 'xterm-256color'},
   );
-
   void _runTest() {
     if (queue2.isEmpty) return;
     setState(() {
-      String test_command = "python3 maintest.py ";
+      String test_command = "${pythonName} maintest.py ";
       for (var i in queue2) {
         for (var j in i.cases) {
           if (j["isChecked"]) {
@@ -59,12 +90,12 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         }
       }
-      pty.write("${test_command} \r");
+      pty.write("${test_command}\r");
     });
   }
 
   void _parse() {
-    pty.write("python3 parse.py\r");
+    pty.write("${pythonName} parse.py\r");
   }
 
   void _loadTestCase(bool checked) {
@@ -92,10 +123,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    super.initState();
+    _controller = TextEditingController(text: 'python3');
+    pythonName = _controller.text;
     _parse();
     _loadTestCase(true);
     refreshList(queue1, queue2);
-    super.initState();
+  }
+
+  void refreshFailCount() {
+    setState(() {
+      failCount++;
+      print(failCount);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -104,6 +150,24 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+            ),
+            width: 200,
+            margin: EdgeInsets.symmetric(vertical: 3, horizontal: 0),
+            child: TextField(
+              decoration: InputDecoration(
+                border: InputBorder.none,
+              ),
+              style: TextStyle(color: Colors.grey),
+              controller: _controller,
+              onChanged: (String name) {
+                pythonName = name;
+              },
+            ),
+          ),
           Container(
             decoration: BoxDecoration(
               color: Color.fromARGB(255, 72, 68, 72),
@@ -202,7 +266,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 setState(
                   () {
                     Map<String, dynamic> saveFile = {
-                      'mode': 0,
+                      'mode': mode,
                       'testCases': []
                     };
                     for (var i = 0; i < queue2.length; i++) {
@@ -288,6 +352,116 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           Container(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size.zero, // Set this
+                padding: EdgeInsets.zero, // and this
+              ),
+              child: FailIcon(tempJsonFileName: tempJsonFileName),
+              onPressed: () async {
+                final result = await showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    final contents = File(tempJsonFileName).readAsLinesSync();
+
+                    List<Map<String, dynamic>> failCases = [];
+                    for (final item in contents) {
+                      Map<String, dynamic> testCase = jsonDecode(item);
+                      if (testCase['outcome'] == 'failed') {
+                        failCases.add(testCase);
+                      }
+                    }
+                    return AlertDialog(
+                      title: const Text('Failed cases'),
+                      content: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        height: MediaQuery.of(context).size.height * 0.8,
+                        child: ListView.separated(
+                          itemBuilder: (context, index) => Card(
+                            child: ListTile(
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${index + 1}: ${failCases[index]['location'][0]}',
+                                      style: TextStyle(fontSize: 24),
+                                    ),
+                                    Text('${failCases[index]['location'][2]}'),
+                                  ],
+                                ),
+                                subtitle: Container(
+                                    child: Column(
+                                  children: [
+                                    JsonViewer(failCases[index]['longrepr']
+                                            ['reprtraceback']['reprentries'][0]
+                                        ['data']['lines']),
+                                    JsonViewer(failCases[index]['longrepr']
+                                            ['reprtraceback']['reprentries'][0]
+                                        ['data']['reprfileloc']),
+                                  ],
+                                ))),
+                          ),
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemCount: failCases.length,
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'OK'),
+                          child: const Text('Run these Cases'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+                if (result == 'OK') {
+                  setState(() {
+                    print('OK');
+                    final contents = File(tempJsonFileName).readAsLinesSync();
+
+                    List<Map<String, dynamic>> failCases = [];
+                    for (final item in contents) {
+                      Map<String, dynamic> testCase = jsonDecode(item);
+                      if (testCase['outcome'] == 'failed') {
+                        failCases.add(testCase);
+                      }
+                    }
+                    _loadTestCase(false);
+                    try {
+                      for (final jsonItem in failCases) {
+                        final name =
+                            ((jsonItem['location'] as List)[0] as String)
+                                .split('\\')
+                                .last;
+                        print('name ${name}');
+                        for (int i = 0; i < queue1.length; i++) {
+                          if (queue1[i].name == name) {
+                            final caseName =
+                                ((jsonItem['location'] as List)[2] as String)
+                                    .split('.')
+                                    .last;
+                            print(caseName);
+                            for (int k = 0; k < queue1[i].cases.length; k++) {
+                              if (queue1[i].cases[k]['name'] == caseName) {
+                                queue1[i].cases[k]['isChecked'] = true;
+                              }
+                            }
+                          }
+                        }
+                      }
+                    } catch (e) {}
+
+                    refreshList(queue1, queue2);
+                  });
+                }
+              },
+            ),
+          ),
+          Container(
             decoration: BoxDecoration(
               color: Colors.grey,
             ),
@@ -323,29 +497,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
-  }
-}
-
-void refreshList(
-  List<TestCase> q1,
-  List<TestCase> q2,
-) {
-  q2.clear();
-  for (final testCase in q1) {
-    final List<Map> cases = [];
-    for (final i in testCase.cases) {
-      if (i["isChecked"]) {
-        cases.add(i);
-      }
-    }
-    TestCase temp = TestCase(
-      testCase.name,
-      testCase.path,
-      cases,
-    );
-    if (cases.length != 0) {
-      q2.add(temp);
-    }
   }
 }
 

@@ -20,5 +20,6 @@ pytest.main(['-s','./subpath1/test_module1.py'])        # -s: 顯示程序中的
 '''
 # './tests/YCP/fake_test.py::Test::test_1', './tests/YCP/fake_test.py::Test::test_2'
 if __name__ == '__main__':
-    pytest.main(['--disable-warnings', '-v', '--html=report.html'] + sys.argv[1:])
+    pytest.main(['--disable-warnings', '-v', '--html=report.html',
+                '--report-log=FILE'] + sys.argv[1:])
     # pytest.main(['--html=result.html', '--disable-warnings', '-s', './tests/YMK/', '-rA', '-m=YMK])
