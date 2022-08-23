@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController _controller;
   late String pythonName;
   int failCount = 0;
-  String tempJsonFileName = 'FILE';
+  String tempJsonFileName = 'fail_json.temp';
   int mode = 0; // 0 -> YCP, 1 -> YMK
   final pty = PseudoTerminal.start(
     r'C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe',
@@ -134,7 +134,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void refreshFailCount() {
     setState(() {
       failCount++;
-      print(failCount);
     });
   }
 
@@ -362,65 +361,86 @@ class _MyHomePageState extends State<MyHomePage> {
                 final result = await showDialog<String>(
                   context: context,
                   builder: (BuildContext context) {
-                    final contents = File(tempJsonFileName).readAsLinesSync();
+                    try {
+                      final contents = File(tempJsonFileName).readAsLinesSync();
 
-                    List<Map<String, dynamic>> failCases = [];
-                    for (final item in contents) {
-                      Map<String, dynamic> testCase = jsonDecode(item);
-                      if (testCase['outcome'] == 'failed') {
-                        failCases.add(testCase);
+                      List<Map<String, dynamic>> failCases = [];
+                      for (final item in contents) {
+                        Map<String, dynamic> testCase = jsonDecode(item);
+                        if (testCase['outcome'] == 'failed') {
+                          failCases.add(testCase);
+                        }
                       }
-                    }
-                    return AlertDialog(
-                      title: const Text('Failed cases'),
-                      content: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        height: MediaQuery.of(context).size.height * 0.8,
-                        child: ListView.separated(
-                          itemBuilder: (context, index) => Card(
-                            child: ListTile(
-                                title: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${index + 1}: ${failCases[index]['location'][0]}',
-                                      style: TextStyle(fontSize: 24),
-                                    ),
-                                    Text('${failCases[index]['location'][2]}'),
-                                  ],
-                                ),
-                                subtitle: Container(
-                                    child: Column(
-                                  children: [
-                                    JsonViewer(failCases[index]['longrepr']
-                                            ['reprtraceback']['reprentries'][0]
-                                        ['data']['lines']),
-                                    JsonViewer(failCases[index]['longrepr']
-                                            ['reprtraceback']['reprentries'][0]
-                                        ['data']['reprfileloc']),
-                                  ],
-                                ))),
+                      return AlertDialog(
+                        title: const Text('Failed cases'),
+                        content: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          height: MediaQuery.of(context).size.height * 0.8,
+                          child: ListView.separated(
+                            itemBuilder: (context, index) => Card(
+                              child: ListTile(
+                                  title: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${index + 1}: ${failCases[index]['location'][0]}',
+                                        style: TextStyle(fontSize: 24),
+                                      ),
+                                      Text(
+                                          '${failCases[index]['location'][2]}'),
+                                    ],
+                                  ),
+                                  subtitle: Container(
+                                      child: Column(
+                                    children: [
+                                      JsonViewer({
+                                        "file_name": failCases[index]
+                                                    ['longrepr']
+                                                ['reprtraceback']['reprentries']
+                                            [0]['data']['reprfileloc']['path'],
+                                        "line_number": failCases[index]
+                                                        ['longrepr']
+                                                    ['reprtraceback']
+                                                ['reprentries'][0]['data']
+                                            ['reprfileloc']['lineno'],
+                                        "message": failCases[index]['longrepr']
+                                            ['reprcrash']['message']
+                                      }),
+                                    ],
+                                  ))),
+                            ),
+                            separatorBuilder: (context, index) =>
+                                const Divider(),
+                            itemCount: failCases.length,
                           ),
-                          separatorBuilder: (context, index) => const Divider(),
-                          itemCount: failCases.length,
                         ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, 'Cancel'),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, 'OK'),
-                          child: const Text('Run these Cases'),
-                        ),
-                      ],
-                    );
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, 'Cancel'),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, 'OK'),
+                            child: const Text('Run these Cases'),
+                          ),
+                        ],
+                      );
+                    } catch (e) {
+                      return AlertDialog(
+                        content: Text('No fail tests'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, 'OK'),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    }
                   },
                 );
                 if (result == 'OK') {
                   setState(() {
-                    print('OK');
                     final contents = File(tempJsonFileName).readAsLinesSync();
 
                     List<Map<String, dynamic>> failCases = [];
@@ -437,14 +457,14 @@ class _MyHomePageState extends State<MyHomePage> {
                             ((jsonItem['location'] as List)[0] as String)
                                 .split('\\')
                                 .last;
-                        print('name ${name}');
+
                         for (int i = 0; i < queue1.length; i++) {
                           if (queue1[i].name == name) {
                             final caseName =
                                 ((jsonItem['location'] as List)[2] as String)
                                     .split('.')
                                     .last;
-                            print(caseName);
+
                             for (int k = 0; k < queue1[i].cases.length; k++) {
                               if (queue1[i].cases[k]['name'] == caseName) {
                                 queue1[i].cases[k]['isChecked'] = true;

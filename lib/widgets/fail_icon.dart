@@ -29,18 +29,22 @@ class _FailIconState extends State<FailIcon> {
 
   void refreshFailCount() {
     print(failCount);
-    final contents = File(widget.tempJsonFileName).readAsLinesSync();
+    try {
+      final contents = File(widget.tempJsonFileName).readAsLinesSync();
 
-    List<Map<String, dynamic>> failCases = [];
-    for (final item in contents) {
-      Map<String, dynamic> testCase = jsonDecode(item);
-      if (testCase['outcome'] == 'failed') {
-        failCases.add(testCase);
+      List<Map<String, dynamic>> failCases = [];
+      for (final item in contents) {
+        Map<String, dynamic> testCase = jsonDecode(item);
+        if (testCase['outcome'] == 'failed') {
+          failCases.add(testCase);
+        }
       }
+      setState(() {
+        failCount = failCases.length;
+      });
+    } on Exception catch (e) {
+      print(e);
     }
-    setState(() {
-      failCount = failCases.length;
-    });
   }
 
   @override
@@ -52,14 +56,23 @@ class _FailIconState extends State<FailIcon> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: AppBar().preferredSize.height,
+      width: AppBar().preferredSize.height,
       decoration: BoxDecoration(
         color: failCount == 0 ? Colors.green : Colors.red,
       ),
       margin: EdgeInsets.zero,
+      padding: EdgeInsets.all(10),
       child: Badge(
         badgeColor: Colors.white,
         badgeContent: Text('$failCount'),
-        child: failCount == 0 ? Icon(Icons.check) : Icon(Icons.warning),
+        child: failCount == 0
+            ? Icon(
+                Icons.check,
+              )
+            : Icon(
+                Icons.warning,
+              ),
       ),
     );
   }
