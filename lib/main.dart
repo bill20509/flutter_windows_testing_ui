@@ -395,6 +395,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                       child: Column(
                                     children: [
                                       JsonViewer({
+                                        "code": failCases[index]['longrepr']
+                                                ['reprtraceback']['reprentries']
+                                            [0]['data']['lines'],
+                                      }),
+                                      JsonViewer({
                                         "file_name": failCases[index]
                                                     ['longrepr']
                                                 ['reprtraceback']['reprentries']

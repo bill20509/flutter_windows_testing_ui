@@ -28,7 +28,6 @@ class _FailIconState extends State<FailIcon> {
   }
 
   void refreshFailCount() {
-    print(failCount);
     try {
       final contents = File(widget.tempJsonFileName).readAsLinesSync();
 
