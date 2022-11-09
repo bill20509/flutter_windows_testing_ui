@@ -20,10 +20,12 @@ class Test(object):
 
     @pytest.mark.test
     def test_select_photo_item(self):
-        self.app.deeplink_to_launcher()\
-                .click_photo_edit()\
-                .select_album_item(1)\
-                .select_photo_item(1)
+        launcher_page = self.app.deeplink_to_launcher()
+        launcher_page.click_photo_edit()\
+            .select_album_item(1)\
+            .select_photo_item(1)
+        self.driver.back()
+        launcher_page.click_app_logo()
 
     @pytest.mark.test
     def test_delete_photo(self):

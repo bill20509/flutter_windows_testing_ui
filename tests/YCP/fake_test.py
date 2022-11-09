@@ -7,15 +7,19 @@ class Test(object):
     def setup_method(self):  # run before every test
         print('setup')
 
+    @pytest.mark.fake
     def test_1(self):
         assert 1 == 2
 
+    @pytest.mark.fake
     def test_2(self):
         assert 1 == 1
 
+    @pytest.mark.fake
     def test_3(self):
         assert 1 == 1
 
+    @pytest.mark.fake
     def test_4(self):
         assert 1 == 3
 

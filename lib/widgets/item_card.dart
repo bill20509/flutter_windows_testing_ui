@@ -8,18 +8,21 @@ class itemCard extends StatefulWidget {
     required this.q1,
     required this.q2,
     required this.index,
+    required this.isCheckedList,
   }) : super(key: key);
   final Function parentSetState;
   final List<TestCase> q1;
   final List<TestCase> q2;
+  final List<bool> isCheckedList;
   final int index;
   @override
   State<itemCard> createState() => _itemCardState();
 }
 
-class _itemCardState extends State<itemCard> {
+class _itemCardState extends State<itemCard>
+    with AutomaticKeepAliveClientMixin {
   bool display = false;
-  bool isChecked = true;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -48,7 +51,7 @@ class _itemCardState extends State<itemCard> {
                   ),
                   Checkbox(
                     checkColor: Colors.white,
-                    value: isChecked,
+                    value: widget.isCheckedList[widget.index],
                     onChanged: (bool? value) {
                       widget.parentSetState(() {
                         for (var i = 0;
@@ -57,7 +60,7 @@ class _itemCardState extends State<itemCard> {
                           widget.q1[widget.index].cases[i]['isChecked'] = value;
                         }
 
-                        isChecked = value!;
+                        widget.isCheckedList[widget.index] = value!;
                       });
                     },
                   ),
@@ -92,4 +95,7 @@ class _itemCardState extends State<itemCard> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

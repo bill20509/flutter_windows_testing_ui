@@ -1,6 +1,7 @@
 import 'dart:isolate';
 
 import 'package:example/widgets/fail_icon.dart';
+import 'package:example/widgets/search_list.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
@@ -69,7 +70,9 @@ void refreshList(
 class _MyHomePageState extends State<MyHomePage> {
   List<TestCase> queue1 = [];
   List<TestCase> queue2 = [];
+  List<bool> isCheckedList = [];
   late TextEditingController _controller;
+  late TextEditingController _controller2;
   late String pythonName;
   int failCount = 0;
   String tempJsonFileName = 'fail_json.temp';
@@ -101,30 +104,35 @@ class _MyHomePageState extends State<MyHomePage> {
   void _loadTestCase(bool checked) {
     queue1 = [];
     queue2 = [];
+    isCheckedList = [];
     String contents = "";
-    if (mode == 0) {
-      contents = File('./YCP_cases.json').readAsStringSync();
-    } else if (mode == 1) {
-      contents = File('./YMK_cases.json').readAsStringSync();
-    }
-    List<dynamic> test_cases = jsonDecode(contents);
-    for (var i in test_cases) {
-      List<Map> temp_list_map = [];
-      for (var j in i["cases"]) {
-        temp_list_map.add({
-          "name": j,
-          "isChecked": checked,
-        });
+    try {
+      if (mode == 0) {
+        contents = File('./YCP_cases.json').readAsStringSync();
+      } else if (mode == 1) {
+        contents = File('./YMK_cases.json').readAsStringSync();
       }
-      TestCase temp = TestCase(i["case_name"], i["path"], temp_list_map);
-      queue1.add(temp);
-    }
+      List<dynamic> test_cases = jsonDecode(contents);
+      for (var i in test_cases) {
+        List<Map> temp_list_map = [];
+        for (var j in i["cases"]) {
+          temp_list_map.add({
+            "name": j,
+            "isChecked": checked,
+          });
+        }
+        TestCase temp = TestCase(i["case_name"], i["path"], temp_list_map);
+        queue1.add(temp);
+        isCheckedList.add(true);
+      }
+    } catch (e) {}
   }
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: 'python3');
+    _controller2 = TextEditingController();
     pythonName = _controller.text;
     _parse();
     _loadTestCase(true);
@@ -154,7 +162,47 @@ class _MyHomePageState extends State<MyHomePage> {
               color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(5)),
             ),
-            width: 200,
+            width: 150,
+            margin: EdgeInsets.symmetric(vertical: 3, horizontal: 3),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Mark search',
+                border: InputBorder.none,
+                suffixIcon: IconButton(
+                  onPressed: () async {
+                    var app_name = mode == 0 ? "YCP" : "YMK";
+                    pty.write(
+                        "${_controller.text} -m pytest tests/${app_name}/ -m ${_controller2.text} --collectonly -q --disable-warnings > search.temp\r");
+                    final result = await showDialog<List<String>>(
+                      context: context,
+                      builder: (context) {
+                        return SearchList();
+                      },
+                    );
+                    if (result != null && result.length > 1) {
+                      String test_command = "${pythonName} maintest.py ";
+                      for (var i in result) {
+                        test_command += "$i ";
+                      }
+                      pty.write("$test_command\r");
+                    } else {
+                      print('cancel');
+                    }
+                  },
+                  icon: Icon(Icons.search),
+                  color: Colors.black,
+                ),
+              ),
+              style: TextStyle(color: Colors.grey),
+              controller: _controller2,
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+            ),
+            width: 150,
             margin: EdgeInsets.symmetric(vertical: 3, horizontal: 0),
             child: TextField(
               decoration: InputDecoration(
@@ -509,6 +557,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Body(
             queue1,
             queue2,
+            isCheckedList,
             pty,
           ),
         ),
@@ -529,12 +578,14 @@ class Body extends StatefulWidget {
   const Body(
     List<TestCase> this.q1,
     List<TestCase> this.q2,
+    List<bool> this.isCheckedList,
     PseudoTerminal this.pty, {
     Key? key,
   }) : super(key: key);
   final List<TestCase> q1;
   final List<TestCase> q2;
   final PseudoTerminal pty;
+  final List<bool> isCheckedList;
   @override
   State<Body> createState() => _BodyState();
 }
@@ -542,6 +593,7 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   final ScrollController _firstController = ScrollController();
   final ScrollController _secondController = ScrollController();
+  bool selectAll = true;
   @override
   Widget build(BuildContext context) {
     refreshList(widget.q1, widget.q2);
@@ -551,16 +603,42 @@ class _BodyState extends State<Body> {
         children: <Widget>[
           Column(
             children: [
-              Builder(
-                builder: (BuildContext ctx) {
-                  int count = 0;
-                  for (final item in widget.q1) {
-                    for (final item2 in item.cases) {
-                      count += 1;
-                    }
-                  }
-                  return Text('Total Cases: $count');
-                },
+              Row(
+                children: [
+                  Builder(
+                    builder: (BuildContext ctx) {
+                      int count = 0;
+                      for (final item in widget.q1) {
+                        for (final item2 in item.cases) {
+                          count += 1;
+                        }
+                      }
+                      return Text('Total Cases: $count');
+                    },
+                  ),
+                  Checkbox(
+                      value: selectAll,
+                      onChanged: (value) {
+                        setState(() {
+                          selectAll = !selectAll;
+                          for (int index = 0;
+                              index < widget.isCheckedList.length;
+                              index++) {
+                            widget.isCheckedList[index] = selectAll;
+                          }
+                          for (int index = 0;
+                              index < widget.q1.length;
+                              index++) {
+                            for (int j = 0;
+                                j < widget.q1[index].cases.length;
+                                j++) {
+                              widget.q1[index].cases[j]['isChecked'] =
+                                  selectAll;
+                            }
+                          }
+                        });
+                      }),
+                ],
               ),
               Expanded(
                 child: SizedBox(
@@ -576,6 +654,7 @@ class _BodyState extends State<Body> {
                           parentSetState: setState,
                           q1: widget.q1,
                           q2: widget.q2,
+                          isCheckedList: widget.isCheckedList,
                           index: index,
                         );
                       },
