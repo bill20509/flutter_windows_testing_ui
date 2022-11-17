@@ -18,7 +18,9 @@ class Test(object):
 
     @pytest.mark.camera
     def test_name(self):
-        self.app.deeplink_to_photo_edit()
+        self.app.deeplink_to_photo_edit()\
+            .click_background()\
+
 
     def teardown_method(self):  # quit driver when test case done
         time.sleep(3)

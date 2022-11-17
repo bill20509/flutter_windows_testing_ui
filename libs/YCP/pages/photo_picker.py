@@ -16,7 +16,12 @@ class PhotoPickerPage(pages.YCP_base.YCPBase):
         return self
 
     def select_album_item(self, name: str):
-        self.click_element_by_text(name)
+        for i in range(5):
+            try:
+                self.click_element_by_text(name)
+                break
+            except:
+                self.scroll_vertical()
         return self
 
     def select_photo_item(self, num: int):
@@ -36,6 +41,10 @@ class PhotoPickerPage(pages.YCP_base.YCPBase):
 
     def click_delete(self):
         self.click_element(ePhotoPickerPage.delete_button)
+        return self
+
+    def click_back(self):
+        self.click_element(ePhotoPickerPage.back_button)
         return self
 
     def click_delete_photo(self):

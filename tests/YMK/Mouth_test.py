@@ -2,269 +2,317 @@ import pytest
 from libs.app import App
 from libs.YMK.pages.YMK_base import YMKbase
 import time
+from pytest_html import extras
+
+folder_name = "1.Makeup"
 
 
-class TestMouth(object):
+class Test(object):
     def setup_method(self):  # run before every test
         # 設定device
-        self.driver = App().set_udid("6L59ZXRCVS7XFUJ7")\
-            .set_platform("Android")\
-            .set_version("11")\
-            .set_app("YMK")\
+        self.driver = App().set_auto() \
+            .set_app("YMK") \
+            .set_wait_time(5) \
+            .set_newcommand_timeout(9999) \
             .create()
         self.app = YMKbase(self.driver)
 
-    @pytest.mark.mouth
-    def test_edit_lipcolor_sheer(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4) \
-            .waiting_cursor() \
-            .select_brand("PERFECT")\
-            .screenshot("test_edit_lipcolor_sheer_before", 3)\
-            .select_color(1)\
-            .screenshot("test_edit_lipcolor_sheer_after", 3)\
-            .compare_photo("test_edit_lipcolor_sheer_before", "test_edit_lipcolor_sheer_after", "test_edit_lipcolor_sheer_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipcolor_sheer_save")
-
-    @pytest.mark.mouth
-    def test_edit_lipcolor_matte(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4) \
-            .waiting_cursor() \
-            .select_brand("PERFECT")\
-            .screenshot("test_edit_lipcolor_matte_before", 3)\
-            .select_texture("Matte")\
-            .screenshot("test_edit_lipcolor_matte_after", 3)\
-            .compare_photo("test_edit_lipcolor_matte_before", "test_edit_lipcolor_matte_after", "test_edit_lipcolor_matte_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipcolor_matte_save")
-
-    @pytest.mark.mouth
-    def test_edit_lipcolor_gloss(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4) \
-            .waiting_cursor() \
-            .select_brand("PERFECT")\
-            .screenshot("test_edit_lipcolor_gloss_before", 3)\
-            .select_texture("Gloss")\
-            .screenshot("test_edit_lipcolor_gloss_after", 3)\
-            .compare_photo("test_edit_lipcolor_gloss_before", "test_edit_lipcolor_gloss_after", "test_edit_lipcolor_gloss_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipcolor_gloss_save")
-
-    @pytest.mark.mouth
-    def test_edit_lipcolor_satin(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4) \
-            .waiting_cursor() \
-            .select_brand("PERFECT")\
-            .screenshot("test_edit_lipcolor_satin_before", 3)\
-            .select_texture("Satin")\
-            .screenshot("test_edit_lipcolor_satin_after", 3)\
-            .compare_photo("test_edit_lipcolor_satin_before", "test_edit_lipcolor_satin_after", "test_edit_lipcolor_satin_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipcolor_satin_save")
-
-    @pytest.mark.mouth
-    def test_edit_lipcolor_shimmer(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4) \
-            .waiting_cursor() \
-            .select_brand("PERFECT")\
-            .screenshot("test_edit_lipcolor_shimmer_before", 3)\
-            .select_texture("Shimmer")\
-            .screenshot("test_edit_lipcolor_shimmer_after", 3)\
-            .compare_photo("test_edit_lipcolor_shimmer_before", "test_edit_lipcolor_shimmer_after", "test_edit_lipcolor_shimmer_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipcolor_shimmer_save")
-
-    @pytest.mark.mouth
-    def test_edit_lipcolor_metallic(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4) \
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lipcolor_texture_sheer(self, extra):
+        self.app.deeplink_to_lipstick() \
+            .pick_photo(folder_name, 1) \
             .waiting_cursor() \
             .select_brand("PERFECT") \
-            .screenshot("test_edit_lipcolor_metallic_before", 3)\
-            .select_texture("Metallic")\
-            .screenshot("test_edit_lipcolor_metallic_after", 3)\
-            .compare_photo("test_edit_lipcolor_metallic_before", "test_edit_lipcolor_metallic_after", "test_edit_lipcolor_metallic_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipcolor_metallic_save")
+            .select_color(1) \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipcolor_texture_sheer_save")
+        extra.append(extras.image('savephoto/1_test_edit_lipcolor_texture_sheer_save.jpg'))
 
-    @pytest.mark.mouth
-    def test_edit_lipcolor_holographic(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4) \
+    @pytest.mark.B
+    @pytest.mark.S2
+    def test_edit_lipcolor_texture_matte(self, extra):
+        self.app.deeplink_to_lipstick() \
+            .pick_photo(folder_name, 1) \
             .waiting_cursor() \
             .select_brand("PERFECT") \
-            .screenshot("test_edit_lipcolor_holographic_before", 3)\
-            .select_texture("Holographic")\
-            .screenshot("test_edit_lipcolor_holographic_after", 3)\
-            .compare_photo("test_edit_lipcolor_holographic_before", "test_edit_lipcolor_holographic_after", "test_edit_lipcolor_holographic_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipcolor_holographic_save")
+            .select_texture("Matte") \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipcolor_texture_matte_save")
+        extra.append(extras.image('savephoto/1_test_edit_lipcolor_texture_matte_save.jpg'))
 
-
-    @pytest.mark.mouth
-    def test_edit_lipcolor_2colors(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4) \
+    @pytest.mark.B
+    @pytest.mark.S2
+    def test_edit_lipcolor_texture_gloss(self, extra):
+        self.app.deeplink_to_lipstick() \
+            .pick_photo(folder_name, 1) \
             .waiting_cursor() \
-            .select_brand("PERFECT")\
-            .screenshot("test_edit_lipcolor_2colors_before", 3)\
-            .select_tab("2 COLORS")\
-            .select_color(1)\
-            .screenshot("test_edit_lipcolor_2colors_after", 3)\
-            .compare_photo("test_edit_lipcolor_2colors_before", "test_edit_lipcolor_2colors_after", "test_edit_lipcolor_2colors_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipcolor_2colors_save")
+            .select_brand("PERFECT") \
+            .select_texture("Gloss") \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipcolor_texture_gloss_save")
+        extra.append(extras.image('savephoto/1_test_edit_lipcolor_texture_gloss_save.jpg'))
 
-    @pytest.mark.mouth
-    def test_edit_lipcolor_ombre(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4) \
+    @pytest.mark.B
+    @pytest.mark.S2
+    def test_edit_lipcolor_texture_satin(self, extra):
+        self.app.deeplink_to_lipstick() \
+            .pick_photo(folder_name, 1) \
             .waiting_cursor() \
-            .select_brand("PERFECT")\
-            .screenshot("test_edit_lipcolor_ombre_before", 3)\
-            .select_tab("OMBRE")\
-            .select_color(1)\
-            .screenshot("test_edit_lipcolor_ombre_after", 3)\
-            .compare_photo("test_edit_lipcolor_ombre_before", "test_edit_lipcolor_ombre_after", "test_edit_lipcolor_ombre_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipcolor_ombre_save")
+            .select_brand("PERFECT") \
+            .select_texture("Satin") \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipcolor_texture_satin_save")
+        extra.append(extras.image('savephoto/1_test_edit_lipcolor_texture_satin_save.jpg'))
+
+    @pytest.mark.B
+    @pytest.mark.S2
+    def test_edit_lipcolor_texture_shimmer(self, extra):
+        self.app.deeplink_to_lipstick() \
+            .pick_photo(folder_name, 1) \
+            .waiting_cursor() \
+            .select_brand("PERFECT") \
+            .select_texture("Shimmer") \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipcolor_texture_shimmer_save")
+        extra.append(extras.image('savephoto/1_test_edit_lipcolor_texture_shimmer_save.jpg'))
+
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lipcolor_texture_metallic(self, extra):
+        self.app.deeplink_to_lipstick() \
+            .pick_photo(folder_name, 1) \
+            .waiting_cursor() \
+            .select_brand("PERFECT") \
+            .select_texture("Metallic") \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipcolor_texture_metallic_save")
+        extra.append(extras.image('savephoto/1_test_edit_lipcolor_texture_metallic_save.jpg'))
+
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lipcolor_texture_holographic(self, extra):
+        self.app.deeplink_to_lipstick() \
+            .pick_photo(folder_name, 1) \
+            .waiting_cursor() \
+            .select_brand("PERFECT") \
+            .select_texture("Holographic") \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipcolor_texture_holographic_save")
+        extra.append(extras.image('savephoto/1_test_edit_lipcolor_texture_holographic_save.jpg'))
 
     @pytest.mark.mouth
-    def test_edit_lipart(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4)\
-            .select_lipart()\
+    def test_edit_lipcolor_2colors(self, extra):
+        self.app.deeplink_to_lipstick() \
+            .pick_photo(folder_name, 1) \
+            .waiting_cursor() \
+            .select_brand("PERFECT") \
+            .screenshot("test_edit_lipcolor_2colors_before", 3) \
+            .select_tab("2 COLORS") \
+            .select_color(1) \
+            .screenshot("test_edit_lipcolor_2colors_after", 3) \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipcolor_2colors_save")
+        extra.append(extras.image('savephoto/1_test_edit_lipcolor_2colors_save.jpg'))
+        extra.append(extras.image('screenshot/test_edit_lipcolor_2colors_after.png'))
+        extra.append(extras.image('screenshot/test_edit_lipcolor_2colors_before.png'))
+
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lipcolor_ombre(self, extra):
+        self.app.deeplink_to_lipstick() \
+            .pick_photo(folder_name, 1) \
+            .waiting_cursor() \
+            .select_brand("PERFECT") \
+            .screenshot("test_edit_lipcolor_ombre_before", 3) \
+            .select_tab("OMBRE") \
+            .select_color(1) \
+            .screenshot("test_edit_lipcolor_ombre_after", 3) \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipcolor_ombre_save")
+        extra.append(extras.image('savephoto/1_test_edit_lipcolor_ombre_save.jpg'))
+        extra.append(extras.image('screenshot/test_edit_lipcolor_ombre_after.png'))
+        extra.append(extras.image('screenshot/test_edit_lipcolor_ombre_before.png'))
+
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lipart(self, extra):
+        self.app.deeplink_to_lipart() \
+            .pick_photo(folder_name, 1) \
             .screenshot("test_edit_lipart_before", 3) \
-            .select_lipart_pattern(1)\
-            .screenshot("test_edit_lipart_after", 3)\
-            .compare_photo("test_edit_lipart_before", "test_edit_lipart_after", "test_edit_lipart_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipart_save")
+            .select_lipart_pattern(1) \
+            .screenshot("test_edit_lipart_after", 3) \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipart_save")
+        extra.append(extras.image('savephoto/1_test_edit_lipart_save.jpg'))
+        extra.append(extras.image('screenshot/test_edit_lipart_after.png'))
+        extra.append(extras.image('screenshot/test_edit_lipart_before.png'))
 
-    @pytest.mark.mouth
-    def test_edit_lipcolor_intensity(self):
-        self.app.deeplink_to_lipstick()\
-            .pick_photo("YMK_test_photos", 4)\
-            .waiting_cursor()\
-            .select_brand("PERFECT")\
-            .select_color(1)\
-            .screenshot("test_edit_lipcolor_intensity_before", 3)\
-            .adjust_intensity_to_top()\
-            .screenshot("test_edit_lipcolor_intensity_after", 3)\
-            .compare_photo("test_edit_lipcolor_intensity_before", "test_edit_lipcolor_intensity_after", "test_edit_lipcolor_intensity_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipcolor_intensity_save")
+    @pytest.mark.B
+    @pytest.mark.S2
+    def test_edit_lipcolor_intensity(self, extra):
+        self.app.deeplink_to_lipstick() \
+            .pick_photo(folder_name, 1) \
+            .waiting_cursor() \
+            .select_brand("PERFECT") \
+            .select_color(1) \
+            .screenshot("test_edit_lipcolor_intensity_before", 3) \
+            .adjust_intensity_to_top() \
+            .screenshot("test_edit_lipcolor_intensity_after", 3) \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipcolor_intensity_save") \
+            .compose_gif("1_test_edit_lipcolor_intensity", 'screenshot/test_edit_lipcolor_intensity_before.png',
+                         'screenshot/test_edit_lipcolor_intensity_after.png', speed=1)
+        extra.append(extras.image('savephoto/1_test_edit_lipcolor_intensity_save.jpg'))
+        extra.append(extras.image('screenshot/1_test_edit_lipcolor_intensity.gif'))
+        # extra.append(extras.image('screenshot/test_edit_lipcolor_intensity_after.png'))
+        # extra.append(extras.image('screenshot/test_edit_lipcolor_intensity_before.png'))
 
-
-    @pytest.mark.mouth
-    def test_edit_lipshape_size(self):
-        self.app.deeplink_to_lipreshape()\
-            .pick_photo("YMK_test_photos", 4)\
-            .screenshot("test_edit_lipshape_size_before", 3)\
-            .adjust_intensity_to_right()\
-            .screenshot("test_edit_lipshape_size_after", 3)\
-            .compare_photo("test_edit_lipshape_size_before", "test_edit_lipshape_size_after", "test_edit_lipshape_size_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipshape_size_save")
-
-
-    @pytest.mark.mouth
-    def test_edit_lipshape_width(self):
-        self.app.deeplink_to_lipreshape()\
-            .pick_photo("YMK_test_photos", 4)\
-            .select_lipreshape_function("Width")\
-            .screenshot("test_edit_lipshape_width_before", 3)\
-            .adjust_intensity_to_right()\
-            .screenshot("test_edit_lipshape_width_after", 3)\
-            .compare_photo("test_edit_lipshape_width_before", "test_edit_lipshape_width_after", "test_edit_lipshape_width_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipshape_width_save")
-
-    @pytest.mark.mouth
-    def test_edit_lipshape_height(self):
-        self.app.deeplink_to_lipreshape()\
-            .pick_photo("YMK_test_photos", 4)\
-            .select_lipreshape_function("Height")\
-            .screenshot("test_edit_lipshape_height_before", 3)\
-            .adjust_intensity_to_right()\
-            .screenshot("test_edit_lipshape_height_after", 3)\
-            .compare_photo("test_edit_lipshape_height_before", "test_edit_lipshape_height_after", "test_edit_lipshape_height_diff")\
-            .click_save()\
-            .pull_photo_from_device("test_edit_lipshape_height_save")
-
-    @pytest.mark.mouth
-    def test_edit_lipshape_lippeak(self):
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lipshape_size(self, extra):
         self.app.deeplink_to_lipreshape() \
-            .pick_photo("YMK_test_photos", 4) \
-            .select_lipreshape_function("Lip Peak")\
+            .pick_photo(folder_name, 1) \
+            .screenshot("test_edit_lipshape_size_before", 3) \
+            .adjust_intensity_to_right() \
+            .screenshot("test_edit_lipshape_size_after", 3) \
+            .compare_photo("test_edit_lipshape_size_before", "test_edit_lipshape_size_after",
+                           "test_edit_lipshape_size_diff") \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipshape_size_save") \
+            .compose_gif("1_test_edit_lipshape_size", 'screenshot/test_edit_lipshape_size_before.png',
+                         'screenshot/test_edit_lipshape_size_after.png', speed=1)
+        extra.append(extras.image('savephoto/1_test_edit_lipshape_size_save.jpg'))
+        extra.append(extras.image('screenshot/1_test_edit_lipshape_size.gif'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_size_diff.png'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_size_after.png'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_size_before.png'))
+
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lipshape_width(self, extra):
+        self.app.deeplink_to_lipreshape() \
+            .pick_photo(folder_name, 1) \
+            .select_lipreshape_function("Width") \
+            .screenshot("test_edit_lipshape_width_before", 3) \
+            .adjust_intensity_to_right() \
+            .screenshot("test_edit_lipshape_width_after", 3) \
+            .compare_photo("test_edit_lipshape_width_before", "test_edit_lipshape_width_after",
+                           "test_edit_lipshape_width_diff") \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipshape_width_save") \
+            .compose_gif("1_test_edit_lipshape_width", 'screenshot/test_edit_lipshape_width_before.png',
+                         'screenshot/test_edit_lipshape_width_after.png', speed=1)
+        extra.append(extras.image('savephoto/1_test_edit_lipshape_width_save.jpg'))
+        extra.append(extras.image('screenshot/1_test_edit_lipshape_width.gif'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_width_diff.png'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_width_after.png'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_width_before.png'))
+
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lipshape_height(self, extra):
+        self.app.deeplink_to_lipreshape() \
+            .pick_photo(folder_name, 1) \
+            .select_lipreshape_function("Height") \
+            .screenshot("test_edit_lipshape_height_before", 3) \
+            .adjust_intensity_to_right() \
+            .screenshot("test_edit_lipshape_height_after", 3) \
+            .click_save() \
+            .pull_photo_from_device("1_test_edit_lipshape_height_save") \
+            .compose_gif("1_test_edit_lipshape_height", 'screenshot/test_edit_lipshape_height_before.png',
+                         'screenshot/test_edit_lipshape_height_after.png', speed=1)
+        extra.append(extras.image('savephoto/1_test_edit_lipshape_height_save.jpg'))
+        extra.append(extras.image('screenshot/1_test_edit_lipshape_height.gif'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_height_diff.png'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_height_after.png'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_height_before.png'))
+
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lipshape_lippeak(self, extra):
+        self.app.deeplink_to_lipreshape() \
+            .pick_photo(folder_name, 1) \
+            .select_lipreshape_function("Lip Peak") \
             .screenshot("test_edit_lipshape_lippeak_before", 3) \
             .adjust_intensity_to_right() \
             .screenshot("test_edit_lipshape_lippeak_after", 3) \
-            .compare_photo("test_edit_lipshape_lippeak_before", "test_edit_lipshape_lippeak_after","test_edit_lipshape_lippeak_diff") \
+            .compare_photo("test_edit_lipshape_lippeak_before", "test_edit_lipshape_lippeak_after",
+                           "test_edit_lipshape_lippeak_diff") \
             .click_save() \
-            .pull_photo_from_device("test_edit_lipshape_lippeak_save")
+            .pull_photo_from_device("1_test_edit_lipshape_lippeak_save") \
+            .compose_gif("1_test_edit_lipshape_lippeak", 'screenshot/test_edit_lipshape_lippeak_before.png',
+                         'screenshot/test_edit_lipshape_lippeak_after.png', speed=1)
+        extra.append(extras.image('savephoto/1_test_edit_lipshape_lippeak_save.jpg'))
+        extra.append(extras.image('screenshot/1_test_edit_lipshape_lippeak.gif'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_lippeak_diff.png'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_lippeak_after.png'))
+        # extra.append(extras.image('screenshot/test_edit_lipshape_lippeak_before.png'))
 
-    @pytest.mark.mouth
-    def test_edit_smile(self):
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_smile(self, extra):
         self.app.deeplink_to_smile() \
-            .pick_photo("YMK_test_photos", 4) \
+            .pick_photo(folder_name, 1) \
             .screenshot("test_edit_smile_before", 3) \
             .adjust_intensity_to_right() \
             .screenshot("test_edit_smile_after", 3) \
-            .compare_photo("test_edit_smile_before", "test_edit_smile_after","test_edit_smile_diff") \
             .click_save() \
-            .pull_photo_from_device("test_edit_smile_save")
+            .pull_photo_from_device("1_test_edit_smile_save") \
+            .compose_gif("1_test_edit_smile", 'screenshot/test_edit_smile_before.png',
+                         'screenshot/test_edit_smile_after.png', speed=1)
+        extra.append(extras.image('savephoto/1_test_edit_smile_save.jpg'))
+        extra.append(extras.image('screenshot/1_test_edit_smile.gif'))
 
-    @pytest.mark.mouth
-    def test_edit_lip_plumper(self):
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lip_plumper(self, extra):
         self.app.deeplink_to_lipplumper() \
-            .pick_photo("YMK_test_photos", 4) \
+            .pick_photo(folder_name, 1) \
             .screenshot("test_edit_lip_plumper_before", 3) \
             .adjust_intensity_to_right() \
             .screenshot("test_edit_lip_plumper_after", 3) \
-            .compare_photo("test_edit_lip_plumper_before", "test_edit_lip_plumper_after","test_edit_lip_plumper_diff") \
+            .compare_photo("test_edit_lip_plumper_before", "test_edit_lip_plumper_after", "test_edit_lip_plumper_diff") \
             .click_save() \
-            .pull_photo_from_device("test_edit_lip_plumper_save")
+            .pull_photo_from_device("1_test_edit_lip_plumper_save") \
+            .compose_gif("1_test_edit_lip_plumper", 'screenshot/test_edit_lip_plumper_before.png',
+                         'screenshot/test_edit_lip_plumper_after.png', speed=1)
+        extra.append(extras.image('savephoto/1_test_edit_lip_plumper_save.jpg'))
+        extra.append(extras.image('screenshot/1_test_edit_lip_plumper.gif'))
+        # extra.append(extras.image('screenshot/test_edit_lip_plumper_diff.png'))
+        # extra.append(extras.image('screenshot/test_edit_lip_plumper_after.png'))
+        # extra.append(extras.image('screenshot/test_edit_lip_plumper_before.png'))
 
-    @pytest.mark.mouth
-    def test_edit_lip_wrinkle(self):
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lip_wrinkle(self, extra):
         self.app.deeplink_to_lipplumper() \
-            .pick_photo("YMK_test_photos", 4) \
-            .select_lipplumper_function("Lip Wrinkle")\
+            .pick_photo(folder_name, 1) \
+            .select_lipplumper_function("Lip Wrinkle") \
             .screenshot("test_edit_lip_wrinkle_before", 3) \
             .adjust_intensity_to_right() \
             .screenshot("test_edit_lip_wrinkle_after", 3) \
-            .compare_photo("test_edit_lip_wrinkle_before", "test_edit_lip_wrinkle_after","test_edit_lip_wrinkle_diff") \
+            .compare_photo("test_edit_lip_wrinkle_before", "test_edit_lip_wrinkle_after", "test_edit_lip_wrinkle_diff") \
             .click_save() \
-            .pull_photo_from_device("test_edit_lip_wrinkle_save")
+            .pull_photo_from_device("1_test_edit_lip_wrinkle_save") \
+            .compose_gif("1_test_edit_lip_wrinkle", 'screenshot/test_edit_lip_wrinkle_before.png',
+                         'screenshot/test_edit_lip_wrinkle_after.png', speed=1)
+        extra.append(extras.image('savephoto/1_test_edit_lip_wrinkle_save.jpg'))
+        extra.append(extras.image('screenshot/1_test_edit_lip_wrinkle.gif'))
 
-    @pytest.mark.mouth
-    def test_edit_lip_teeth_whitener(self):
+    @pytest.mark.B
+    @pytest.mark.S1
+    def test_edit_lip_teeth_whitener(self, extra):
         self.app.deeplink_to_teethwhitener() \
-            .pick_photo("YMK_test_photos", 3) \
+            .pick_photo("5.Wrinkle", 1) \
             .screenshot("test_edit_lip_teeth_whitener_before", 3) \
             .adjust_intensity_to_right() \
             .screenshot("test_edit_lip_teeth_whitener_after", 3) \
-            .compare_photo("test_edit_lip_teeth_whitener_before", "test_edit_lip_teeth_whitener_after","test_edit_lip_teeth_whitener_diff") \
             .click_save() \
-            .pull_photo_from_device("test_edit_lip_teeth_whitener_save")
-
-
-    @pytest.mark.aa
-    def test_edit_lip_art(self):
-        self.app.deeplink_to_lipart() \
-            .pick_photo("YMK_test_photos", 4) \
-            .screenshot("test_edit_lip_art_before", 3) \
-            .select_texture(1)\
-            .screenshot("test_edit_lip_art_after", 3) \
-            .compare_photo("test_edit_lip_art_before", "test_edit_lip_art_after","test_edit_lip_art_diff") \
-            .click_save() \
-            .pull_photo_from_device("test_edit_lip_art_save")
+            .pull_photo_from_device("5_test_edit_lip_teeth_whitener_save")
+        extra.append(extras.image('savephoto/5_test_edit_lip_teeth_whitener_save.jpg'))
+        extra.append(extras.image('screenshot/test_edit_lip_teeth_whitener_after.png'))
+        extra.append(extras.image('screenshot/test_edit_lip_teeth_whitener_before.png'))
 
     def teardown_method(self):  # quit driver when test case done
         time.sleep(3)

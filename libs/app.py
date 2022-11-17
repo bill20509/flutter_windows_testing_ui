@@ -17,6 +17,10 @@ class App:
             "autoGrantPermissions": True,
             "newCommandTimeout": 60,
             "autoLaunch": False,
+            "disableWindowAnimation": False,
+            "waitForIdleTimeout": 10000,
+            "chromedriverExecutableDir": './PFQA_APP_UI/chromedriver',
+            "chromedriverChromeMappingFile": './PFQA_APP_UI/chromedriver/chromedriver_support.json'
         }
         self.wait_time = 5
 
@@ -68,15 +72,23 @@ class App:
         self.caps["newCommandTimeout"] = timeout
         return self
 
+    def set_noreset(self, bool):
+        self.caps["noReset"] = bool
+        return self
+
     def set_wait_time(self, wait_time):
         self.wait_time = wait_time
+        return self
+
+    def set_disable_animation(self):
+        self.caps["waitForIdleTimeout"] = 1000
+        self.caps["disableWindowAnimation"] = True
         return self
 
     def create(self):
         driver = webdriver.Remote("http://localhost:4723/wd/hub", self.caps)
         driver.implicitly_wait(self.wait_time)
         return driver
-
 
     # def close(self):
     #     self.driver.quit()

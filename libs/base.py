@@ -1,10 +1,9 @@
 # 工具包
-import os
 import re
 import subprocess
 import time
+import imageio.v2 as imageio
 from pathlib import Path
-
 from libs.element import Element
 from appium import webdriver
 from libs.exception import ElementMissingException
@@ -15,6 +14,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver import ActionChains
 from appium.webdriver.common.touch_action import TouchAction
+from libs.YMK.locators import PhotoMakeupLocators
+from PIL import Image as pil_image
+from moviepy.editor import *
+import math
+import base64
 
 
 class BasePage(object):
@@ -22,6 +26,21 @@ class BasePage(object):
 
     def __init__(self, driver: webdriver.Remote):
         self.driver = driver
+
+    def memory_info(self, package_name=""):
+        if package_name == "":
+            package_name = self.driver.caps["appPackage"]
+        self.driver.get_performance_data(package_name, 'memoryinfo', 5)
+        return self
+
+    def wait_time(self, wait=5):
+        """
+        :param wait: wait time default 5 sec
+        :return:
+        """
+        # self.driver.implicitly_wait(time_to_wait=wait)
+        time.sleep(wait)
+        return self
 
     # Deep link
     def deeplink(self, page_link, package_name=""):
@@ -98,8 +117,15 @@ class BasePage(object):
         - self.click_element(Locator.xxx_button)
         """
         try:
-            if(element.element_type == 'text'):
+            if element.element_type == 'text':
                 self.click_element_by_text(element.element_id)
+
+            elif element.element_type == 'class name':
+                self.click_element_by_class(element.element_id)
+
+            elif element.element_type == 'class':
+                self.click_element_by_class(element.element_id)
+
             else:
                 self.driver.find_element(
                     element.element_type, element.element_id).click()
@@ -110,7 +136,7 @@ class BasePage(object):
         return self
 
     # Click the element by name (resource-id and text)
-    def click_element_by_name(self, element, name):
+    def click_element_by_name(self, element: Element, name):
         el_id = "//*[@resource-id='{0}'][@text='{1}']".format(
             element.element_id, name)
         element = Element(el_id, element.element_type, element.element_desc)
@@ -128,11 +154,23 @@ class BasePage(object):
         self.click_element(element)
         return self
 
+    def click_element_by_class(self, element: Element):
+        """Click element by text, if it misses, raise [ElementMissingException]
+        :Args:
+         - text: the text you want to search
+        :Usage:
+        `self.driver.click_element_by_text("Tools")`
+        """
+        self.driver.find_element(By.CLASS_NAME, element.element_id).click()
+
+        return self
+
     # Select element by number (resource-id and index[])
+
     def select_element_by_number(self, element: Element, number: int):
         """ Click [number]'s element
         Args:
-            element (Element): 
+            element (Element):
             number (int): index, start from 0
         Returns:
             return self
@@ -147,7 +185,27 @@ class BasePage(object):
             raise ElementMissingException(message)
         return self
 
+    def longpress_select_element_by_number(self, element: Element, number: int):
+        """ Click [number]'s element
+        Args:
+            element (Element):
+            number (int): index, start from 0
+        Returns:
+            return self
+        """
+        try:
+            e = self.driver.find_elements(
+                element.element_type, element.element_id)
+            actions = ActionChains(self.driver)
+            actions.click_and_hold(e[number]).perform()
+        except:
+            message = "Can't find " + element.element_desc
+            print(message)
+            raise ElementMissingException(message)
+        return self
+
     # Send Value to element
+
     def send_keys_to_element(self, element: Element, value):
         """Send value to element, if it misses, raise [ElementMissingException]
         :Args:
@@ -171,10 +229,14 @@ class BasePage(object):
                 element.element_type, element.element_id).click()
         return self
 
-    def long_press_element(self, element: Element, name):
-        el_id = "//*[@resource-id='{0}'][@text='{1}']".format(
-            element.element_id, name)
-        element = Element(el_id, element.element_type, element.element_desc)
+    def long_press_element(self, element: Element, name=None):
+        if (name != None):
+            el_id = "//*[@resource-id='{0}'][@text='{1}']".format(
+                element.element_id, name)
+        else:
+            el_id = "//*[@resource-id='{0}']".format(
+                element.element_id)
+        element = Element(el_id, "xpath", element.element_desc)
         el = self.driver.find_element(element.element_type, element.element_id)
         actions = ActionChains(self.driver)
         actions.click_and_hold(el).perform()
@@ -194,27 +256,41 @@ class BasePage(object):
         actions.drag_and_drop(el1, el2).perform()
         return self
 
-    def scroll_horizontal(self, element):
+    def scroll_horizontal(self, element: Element, speed=-1):
         el = self.driver.find_element(element.element_type, element.element_id)
         width = el.size["width"]
         height = el.size["height"]
         from_x = width * 0.8
-        to_x = width * 0.2
-        self.driver.execute_script("mobile:dragGesture",
-                                   {"elementId": el,
-                                    "startX": from_x, "startY": height * 0.5,
-                                    "endX": to_x, "endY": height * 0.5})
+        to_x = width * 0.5
+        if speed == -1:
+            self.driver.execute_script("mobile:dragGesture",
+                                       {"elementId": el,
+                                        "startX": from_x, "startY": height * 0.5,
+                                        "endX": to_x, "endY": height * 0.5})
+        else:
+            self.driver.execute_script("mobile:dragGesture",
+                                       {"elementId": el,
+                                        "speed": speed,
+                                        "startX": from_x, "startY": height * 0.5,
+                                        "endX": to_x, "endY": height * 0.5})
 
-    def scroll_vertical(self, element):
+    def scroll_vertical(self, element: Element, speed):
         el = self.driver.find_element(element.element_type, element.element_id)
         width = el.size["width"]
         height = el.size["height"]
         from_y = height * 0.8
-        to_y = height * 0.2
+        to_y = height * 0.5
         self.driver.execute_script("mobile:dragGesture",
-                                   {"elementId": el,
+                                   {"elementId": el,  "speed": speed,
                                     "startX": width * 0.5, "startY": from_y,
                                     "endX": width * 0.5, "endY": to_y})
+
+    def swipe(self, x1: int, y1: int, x2: int, y2: int, speed: int):
+        self.driver.execute_script("mobile:dragGesture",
+                                   {
+                                       "speed": speed,
+                                       "startX": x1, "startY": y1,
+                                       "endX": x2, "endY": y2, "speed": 1000})
 
     def slidebar_to_top(self, element: Element):
         e = self.driver.find_element(
@@ -226,7 +302,7 @@ class BasePage(object):
         self.driver.swipe(m_x, m_y, t_x, t_y)
         return self
 
-    def sliderbar_to_down(self, element: Element):
+    def slidebar_to_down(self, element: Element):
         e = self.driver.find_element(
             element.element_type, element.element_id)
         m_x = int(e.location["x"] + e.size["width"] / 2)
@@ -272,24 +348,30 @@ class BasePage(object):
         self.driver.swipe(m_x, m_y, l_x, l_y)
         return self
 
-    def wait_element_visible(self, element, timeout=10):
+    def wait_element_visible(self, element: Element, timeout=20):
         try:
             WebDriverWait(self.driver, timeout).until(
-                ec.visibility_of_element_located((By.ID, element.element_id)))
+                ec.visibility_of_element_located((element.element_type, element.element_id)))
         except:
             message = "Can't find " + element.element_desc
             print(message)
             raise ElementMissingException(message)
         return self
 
-    def wait_element_invisible(self, element, timeout=30):
+    def wait_text_element_visible(self, text: str, timeout=20):
+        element = Element('//*[@text="{0}"]'.format(text), "xpath", text)
         try:
             WebDriverWait(self.driver, timeout).until(
-                ec.invisibility_of_element_located((By.ID, element.element_id)))
+                ec.visibility_of_element_located((element.element_type, element.element_id)))
         except:
             message = "Can't find " + element.element_desc
             print(message)
             raise ElementMissingException(message)
+        return self
+
+    def wait_element_invisible(self, element: Element, timeout=30):
+        WebDriverWait(self.driver, timeout).until(
+            ec.invisibility_of_element_located((element.element_type, element.element_id)))
         return self
 
     def click_element_in_list(self, element: Optional[Union[str, Element]], list: Element):
@@ -304,15 +386,15 @@ class BasePage(object):
         """
         for i in range(5):
             try:
-                if(isinstance(element, str)):
+                if (isinstance(element, str)):
                     self.click_element_by_text(element)
-                elif(isinstance(element, Element)):
+                elif (isinstance(element, Element)):
                     self.click_element(element)
                 break
             except:
                 # TODO: need to implement scroll to left
                 self.scroll_horizontal(list)
-                time.sleep(1)
+                time.sleep(3)
         return self
 
     def tap_element_coordinates(self, element, x=None, y=None):
@@ -326,6 +408,14 @@ class BasePage(object):
             m_y = int(e.location["y"] + e.size["height"] / 2)
             actions = TouchAction(self.driver)
             actions.tap(e, m_x, m_y).perform()
+        return self
+
+    def compose_gif(self, gif_photo_name, *photos, speed=4):
+        gif_images = []
+        file_name = 'screenshot/' + gif_photo_name + '.gif'
+        for i in photos:
+            gif_images.append(imageio.imread(i))
+        imageio.mimsave(file_name, gif_images, fps=speed)
         return self
 
     def compare_photo(self, photo_a_name: str, photo_b_name: str, diff_photo_name="", result_match=0, threshold=0.0):
@@ -352,25 +442,25 @@ class BasePage(object):
                 # assert float(result_metric) <= result_match
         return self
 
-    # TODO:change file path
-    def pull_photo_from_device(self, rename):
+    def pull_photo_from_device(self, rename, app_name="YMK"):
+        time.sleep(3)
         folder = 'savephoto/'
         Path(folder).mkdir(parents=True, exist_ok=True)
         device = self.driver.caps["udid"]
-        cmd = 'adb -s {0} shell ls /sdcard/DCIM/YouCam\ Makeup/*.jpg'.format(
-            device)
-        process1 = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)\
-            .communicate()[0].decode("utf-8")\
-            .replace('/sdcard/DCIM/YouCam Makeup/', '').strip().split("\r\n")
+        photo_dir = '/sdcard/DCIM/YouCam\ Makeup/' if app_name == "YMK" else '/sdcard/DCIM/YouCam\ Perfect/'
+        cmd = ["adb", "-s", device, "shell", "ls", photo_dir + "*.jpg"]
+        process1 = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) \
+            .communicate()[0].decode("utf-8") \
+            .strip().splitlines()
+
         last_photo = max(process1)
-        pull = 'adb -s {0} pull "/sdcard/DCIM/YouCam Makeup/{1}" {2}'.format(
-            device, last_photo, folder)
+        pull = ["adb", "-s", device, "pull", last_photo, folder]
         subprocess.Popen(pull, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE).wait(5)
         rename = rename + '.jpg'
         # old_file = os.path.join(folder, last_photo)
         # new_file = os.path.join(folder, rename)
-        old_file = Path(folder + last_photo)
+        old_file = Path(folder + last_photo.split('/')[-1])
         file_check = Path(folder + rename)
         if file_check.exists():
             os.remove(file_check)
@@ -379,7 +469,76 @@ class BasePage(object):
         print("Rename {0} to {1}".format(last_photo, rename))
         return self
 
-    # iOS only=====================================================================================================
+    def pull_video_from_device(self, format, rename, app_name="YMK"):
+        time.sleep(3)
+        folder = 'savephoto/'
+        Path(folder).mkdir(parents=True, exist_ok=True)
+        device = self.driver.caps["udid"]
+        video_dir = '/sdcard/DCIM/YouCam\ Makeup/' if app_name == "YMK" else '/sdcard/DCIM/YouCam\ Perfect/'
+        cmd = ["adb", "-s", device, "shell", "ls", video_dir + "*." + format]
+        process1 = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) \
+            .communicate()[0].decode("utf-8") \
+            .strip().splitlines()
+
+        last_video = max(process1)
+        pull = ["adb", "-s", device, "pull", last_video, folder]
+
+        subprocess.Popen(pull, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE).wait(5)
+        rename = rename + '.' + format
+        old_file = Path(folder + last_video.split('/')[-1])
+        file_check = Path(folder + rename)
+
+        if file_check.exists():
+            os.remove(file_check)
+            print("Delete old video {0}".format(rename))
+        old_file.rename(file_check)
+        print("Rename {0} to {1}".format(last_video, rename))
+        return self
+
+    def message(self, text):
+        """For tester print message
+
+        param:
+            text: text which want to show
+        return:
+            BasePage = self
+        """
+        print(text)
+        return self
+
+    def switch_context(self, context_index):
+        """Switch context, usually use with switch_context
+
+        param:
+            context_index: context page
+
+        return:
+            BasePage = self
+        """
+        context = self.driver.contexts[context_index]
+        self.driver.switch_to.context(context)
+        return self
+
+    def switch_windows(self, window_index):
+        """Switch windows, usually use with switch_windows
+
+        param:
+            window_index: windows page
+
+        return:
+            BasePage = self
+        """
+        windows = self.driver.window_handles[window_index]
+        self.driver.switch_to.window(windows)
+        return self
+
+    def click_child_element(self, element1, element2):
+        self.driver.find_element(By.ID, element1).find_element(By.ID, element2).click()
+        return self
+
+    # iOS only head====================================================================================================
     def adjust_slider_to_value(self, element, target_value):
         el = self.driver.find_element(element.element_type, element.element_id)
         is_vertical = el.size["height"] > el.size["width"]
@@ -466,7 +625,7 @@ class BasePage(object):
                   (current_value, target_value))
             loop += 1
 
-    def get_slider_value(self, element):
+    def get_slider_value(self, element: Element):
         return int(re.search(r'\d+', element.get_attribute("value")).group()) / 100
 
     def swipe_gesture(self, element, fromx=float, tox=float, fromy=float, toy=float, duration=int):
@@ -524,3 +683,77 @@ class BasePage(object):
             print("[%s] execution time = %s (s)" % (
                 self.pull_folder_from_app_document.__name__, (time.time() - current_time)))
         return file
+    # iOS only bottom==================================================================================================
+
+    def waiting_cursor(self):
+        self.wait_element_invisible(PhotoMakeupLocators.waiting_cursor)
+        return self
+
+    def get_text_from_element(self, element):
+        text = self.driver.find_element(element.element_type, element.element_id).text
+        return text
+
+    def get_image_dimension(self, file_path):
+        im = pil_image.open(file_path)
+        width, height = im.size
+        print("image dimension:", width, "x", height)
+        return self
+
+    def get_location_from_element(self, element):
+        return self.driver.find_element(element.element_type, element.element_id).location
+
+    def get_screen_size(self):
+        return self.driver.get_window_size()
+
+    def swipe_up(self, speed=1000):
+        screen_size = self.get_screen_size()
+        x = screen_size['width']
+        y = screen_size['height']
+        x = int(x * 0.5)  # x坐标
+        y1 = int(y * 0.75)  # 起始y坐标
+        y2 = int(y * 0.25)  # 终点y坐标
+        self.swipe(x, y1, x, y2, speed)
+        return self
+
+    def get_video_info(self, file_path):
+        clip = VideoFileClip(file_path)
+        width = clip.size[0]
+        height = clip.size[1]
+        print("resolution:", width, "x", height)
+        r = math.gcd(width, height)
+        x = int(width/r)
+        y = int(height/r)
+        print("aspect ratio:", x, ":", y)
+        duration = clip.duration
+        print("duration:" + str(duration) + " seconds")
+        fps = clip.fps
+        print("frame rate:", fps, "fps")
+        return self
+
+    def start_screen_recording(self):
+        self.driver.start_recording_screen()
+        return self
+
+    def stop_screen_recording(self, video_name):
+        path = "screenshot/"
+        Path(path).mkdir(parents=True, exist_ok=True)
+        time.sleep(3)
+        video_data = self.driver.stop_recording_screen()
+        filepath = os.path.join(path, video_name + ".mp4")
+        with open(filepath, "wb+") as vd:
+            vd.write(base64.b64decode(video_data))
+        return self
+
+    def check_element_is_enabled(self, element):
+        if self.driver.find_element(element.element_type, element.element_id).is_enabled():
+            self.driver.find_element(
+                element.element_type, element.element_id).click()
+        return self
+
+    def keyboard_is_shown(self):
+        self.driver.is_keyboard_shown()
+        return self
+
+    def hide_keyboard(self):
+        self.driver.hide_keyboard()
+        return self

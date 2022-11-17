@@ -172,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () async {
                     var app_name = mode == 0 ? "YCP" : "YMK";
                     pty.write(
-                        "${_controller.text} -m pytest tests/${app_name}/ -m ${_controller2.text} --collectonly -q --disable-warnings > search.temp\r");
+                        "${_controller.text} -m pytest tests/${app_name}/ -m \"${_controller2.text}\" --collectonly -q --disable-warnings > search.temp\r");
                     final result = await showDialog<List<String>>(
                       context: context,
                       builder: (context) {

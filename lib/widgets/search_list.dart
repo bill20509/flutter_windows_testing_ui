@@ -35,7 +35,7 @@ class _SearchListState extends State<SearchList> {
               _masForUsing[i].replaceAll(RegExp(r'[^a-zA-Z0-9_\/:\.]+'), '');
           // print('${i} ${_masForUsing[i]}');
         }
-
+        _masForUsing.sort();
         setState(() {
           content = _masForUsing;
           resultList = [];
@@ -80,7 +80,7 @@ class _SearchListState extends State<SearchList> {
         child: ListView.separated(
           itemBuilder: (context, index) {
             return ListTile(
-              title: Text('$index: ${resultList[index]}'),
+              title: Text('${index + 1}: ${resultList[index]}'),
             );
           },
           separatorBuilder: (context, index) => const Divider(),

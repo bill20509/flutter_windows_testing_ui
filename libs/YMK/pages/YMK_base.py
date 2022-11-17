@@ -2,6 +2,8 @@ from libs.base import BasePage
 from libs.YMK.locators import DeepLink
 from libs.YMK import pages
 
+from libs.element import Element
+
 
 class YMKbase(BasePage):
     def __init__(self, driver):
@@ -166,17 +168,21 @@ class YMKbase(BasePage):
         self.deeplink(DeepLink.body_tuner)
         return pages.bodytuner_page.BodyTuner(self.driver)
 
+    def deeplink_to_removal(self):
+        self.deeplink(DeepLink.object_removal)
+        return pages.removal_page.Removal(self.driver)
+
     def deeplink_to_animation(self):
         self.deeplink(DeepLink.animation)
         return pages.animation_page.Animation(self.driver)
 
     def deeplink_to_effect(self):
         self.deeplink(DeepLink.effect)
-        return pages.effects_page.Effects
+        return pages.effects_page.Effects(self.driver)
 
     def deeplink_to_background(self):
         self.deeplink(DeepLink.background)
-        return pages.background_page.Background
+        return pages.background_page.Background(self.driver)
 
     def deeplink_to_eyewear(self):
         self.deeplink(DeepLink.eyewear)
@@ -205,3 +211,26 @@ class YMKbase(BasePage):
     def deeplink_to_aging(self):
         self.deeplink(DeepLink.Aging_page)
         return pages.aging_page.Aging(self.driver)
+
+    def deeplink_to_me(self):
+        self.deeplink(DeepLink.me_page)
+        return pages.me_page.MePage(self.driver)
+
+    def deeplink_to_makeupcam_eyeshadow(self):
+        self.deeplink(DeepLink.MakeupCam.eyeshadow)
+        return pages.makeupcam_page.Makeup(self.driver)
+
+    def swipe_element_to_mid(self, element: Element):
+        device_size = self.driver.get_window_size()
+        device_x_mid = device_size['width']/3
+        device_y_mid = device_size['height']/2
+        e = self.driver.find_element(
+            element.element_type, element.element_id)
+        m_x = int(e.location["x"] + e.size["width"] / 3)
+        m_y = int(e.location["y"] + e.size["height"] / 2)
+        self.swipe(m_x, m_y, device_x_mid, device_y_mid, 1000)
+        return self
+
+    def deeplink_to_setting(self):
+        self.deeplink(DeepLink.setting_page)
+        return pages.setting_page.SettingPage(self.driver)

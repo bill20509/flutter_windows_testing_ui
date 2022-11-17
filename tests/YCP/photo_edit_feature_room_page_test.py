@@ -7,9 +7,7 @@ import time
 class Test(object):
 
     def setup_method(self):  # run before every test
-        self.driver = App().set_udid("R5CR5122ACA")\
-            .set_platform("Android")\
-            .set_version("11")\
+        self.driver = App().set_auto()\
             .set_app("YCP")\
             .set_auto_launch(True)\
             .set_wait_time(5)\
@@ -40,9 +38,9 @@ class Test(object):
     def test_sticker(self):
         self.app.deeplink_to_launcher()\
                 .click_photo_edit()\
-                .select_album_item(1)\
+                .select_album_item("Download")\
                 .select_photo_item(1)\
-                .select_feature_room("Sticker")
+                .click_sticker()
 
     def teardown_method(self):  # quit driver when test case done
         time.sleep(3)
@@ -52,5 +50,5 @@ class Test(object):
 if __name__ == "__main__":
     t = Test()
     t.setup_method()
-    t.test_makeupcam()
+    t.test_sticker()
     t.teardown_method()

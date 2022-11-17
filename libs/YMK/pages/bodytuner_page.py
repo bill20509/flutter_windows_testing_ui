@@ -1,37 +1,27 @@
-from libs.YMK.locators import PickPhotoLocators, BodyTunerLocators
+from libs.YMK.locators import BodyTunerLocators
 from libs.YMK import pages
 
 
-class BodyTuner(pages.YMK_base.YMKbase):
+class BodyTuner(pages.photomakeup_page.PhotoMakeup):
     def __init__(self, driver) -> None:
         super().__init__(driver)
 
-    # Select folder and photo (folder name, photo number)
-    def pick_photo(self, folder, photo=1):
-        for i in range(5):
-            try:
-                self.click_element_by_name(PickPhotoLocators.select_folder, folder)
-                break
-            except (ValueError, Exception):
-                self.scroll_vertical(PickPhotoLocators.album_view)
-        for j in range(5):
-            try:
-                self.select_element_by_number(PickPhotoLocators.select_photo, (photo-1))
-                break
-            except (ValueError, Exception):
-                self.scroll_vertical(PickPhotoLocators.photo_view)
+    def check_tutorial(self):
+        self.wait_element_visible(BodyTunerLocators.tutorial_dialog)
         return self
 
     def click_tutorial_ok(self):
-        self.check_element_is_displayed(BodyTunerLocators.enhancer_slim_ok)
+        self.click_element(BodyTunerLocators.tutorial_OK)
         return self
 
     def select_tool(self, name):
-        try:
-            self.click_element_by_name(BodyTunerLocators.toolbar, name)
-        except (ValueError, Exception):
-            self.scroll_horizontal(BodyTunerLocators.toolbar_view)
-        return self
+        for i in range(10):
+            try:
+                self.click_element_by_name(BodyTunerLocators.toolbar, name)
+                break
+            except (ValueError, Exception):
+                self.scroll_horizontal(BodyTunerLocators.toolbar_view)
+        return BodyTuner(self.driver)
 
     def adjust_intensity_to_right(self):
         self.slidebar_to_right(BodyTunerLocators.effect_seekbar)
@@ -43,11 +33,11 @@ class BodyTuner(pages.YMK_base.YMKbase):
 
     def click_x(self):
         self.click_element(BodyTunerLocators.X_button)
-        return pages.photomakeup_page.PhotoMakeup(self.driver)
+        return self
 
     def click_v(self):
         self.click_element(BodyTunerLocators.V_button)
-        return pages.photomakeup_page.PhotoMakeup(self.driver)
+        return self
 
     def click_undo(self):
         self.click_element(BodyTunerLocators.undo)

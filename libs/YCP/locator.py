@@ -1,8 +1,11 @@
 
 from ast import AsyncFunctionDef
+from matplotlib import animation
 from matplotlib.style import library
 from libs.element import Element
 seek_bar = Element('com.cyberlink.youperfect:id/EffectSeekBar', 'id')
+loading_panel = Element('com.cyberlink.youperfect:id/loadingPanel', 'id')
+progress_bar = Element('android.widget.ProgressBar', 'class name')
 
 
 class eColorPickerPanel:
@@ -25,6 +28,9 @@ class eRatioPanel:
 
 
 class eLauncherPage:
+    hot_feature_list = Element(
+        'com.cyberlink.youperfect:id/featureItemsHost', 'id')
+    scroll_view = Element('com.cyberlink.youperfect:id/nestedScrollView', 'id')
     settings_button = Element(
         "com.cyberlink.youperfect:id/settingsButton", "id")
     premium_button = Element("com.cyberlink.youperfect:id/premiumButton", "id")
@@ -49,11 +55,19 @@ class eLauncherPage:
         "com.cyberlink.youperfect:id/textViewTrendingSeeAll", "id")
     photo_challenge_see_all = Element(
         "com.cyberlink.youperfect:id/textViewPhotoChallengeSeeAll", "id")
+    template_see_all = Element(
+        'com.cyberlink.youperfect:id/textViewTemplateSeeAll', 'id')
 
 
 class eEditFeatureRoom:
     apply_button = Element('com.cyberlink.youperfect:id/toolBarApplyBtn', 'id')
     close_button = Element('com.cyberlink.youperfect:id/toolBarCloseBtn', 'id')
+    select_photo_button = Element(
+        'com.cyberlink.youperfect:id/selectPhotoImage', 'id')
+    no_thanks_button = Element(
+        'com.cyberlink.youperfect:id/alertDialog_buttonPositive', 'id')
+    leave_button = Element(
+        'com.cyberlink.youperfect:id/alertDialog_buttonNegative', 'id')
 
 
 class ePhotoEditTemplate:
@@ -68,6 +82,8 @@ class ePhotoEditTemplate:
         "com.cyberlink.youperfect:id/bottomToolBarEditBtn", "id")
     compare_button = Element(
         "com.cyberlink.youperfect:id/EditViewCompareBtn", "id")
+    photo_view = Element(
+        'com.cyberlink.youperfect:id/indicatorsContainer', 'id')
 
 
 class ePhotoEditPage:
@@ -121,6 +137,8 @@ class ePhotoPickerPage:
         "com.cyberlink.youperfect:id/library_action_text", "id")
     camera_button = Element(
         "com.cyberlink.youperfect:id/library_camera_button", 'id')
+    back_button = Element(
+        "com.cyberlink.youperfect:id/library_back_btn", 'id')
     v_button = Element(
         'com.cyberlink.youperfect:id/library_action_button', 'id')
 
@@ -198,7 +216,7 @@ class eBlurPage:
         'com.cyberlink.youperfect:id/blurBokehModeStarBtn', 'id')
     pen_button = Element('com.cyberlink.youperfect:id/BrushAdjustBtn', 'id')
     paint_button = Element('com.cyberlink.youperfect:id/BrushBtn', 'id')
-    eraser_button = Element(
+    eraser_panel_button = Element(
         'com.cyberlink.youperfect:id/BottomEraserBtn', 'id')
     auto_detect_button = Element(
         'com.cyberlink.youperfect:id/FaceDetectBtn', 'id')
@@ -225,6 +243,7 @@ class eMosaicPage:
     invert_mask_button = Element(
         'com.cyberlink.youperfect:id/InvertMaskBtn', 'id')
     slide_bar = seek_bar
+    erase_button = Element('com.cyberlink.youperfect:id/EraserBtn', 'id')
 
 
 class eClonePage:
@@ -261,11 +280,22 @@ class eEffectPage:
         'com.cyberlink.youperfect:id/animationTakePhotoView', 'id')
     animation_item = Element('com.cyberlink.youperfect:id/effect_icon', 'id')
 
+    fold_button = Element(
+        'com.cyberlink.youperfect:id/try_it_image_view_background', 'id')
+    adjust_panel_button = Element(
+        'com.cyberlink.youperfect:id/grid_adjust', 'id')
+
 
 class eAnimationPage:
     effects_tab = Element('EFFECTS', 'text')
     stickers_tab = Element('STICKERS', 'text')
     wraparounds_tab = Element('WRAPAROUNDS', 'text')
+    animation_item = Element('com.cyberlink.youperfect:id/effect_icon', 'id')
+    forbidden_button = Element(
+        'com.cyberlink.youperfect:id/no_effect_btn', 'id')
+    speed_bar = seek_bar
+    capture_button = Element(
+        "com.cyberlink.youperfect:id/animationTakePhotoView", 'id')
 
 
 class eRemovalPage:
@@ -275,6 +305,7 @@ class eRemovalPage:
         'com.cyberlink.youperfect:id/removalPanelEraseBtn', 'id')
     undo_button = Element('com.cyberlink.youperfect:id/EditViewUndoBtn', 'id')
     redo_button = Element('com.cyberlink.youperfect:id/EditViewRedoBtn', 'id')
+    i_button = Element('com.cyberlink.youperfect:id/moduleTitleIcon', 'id')
     remove_button = Element('com.cyberlink.youperfect:id/removeBtn', 'id')
 
 
@@ -330,6 +361,8 @@ class eStickerPage:
         'com.cyberlink.youperfect:id/myStickerActionTxt', 'id')
     store_button = Element(
         'com.cyberlink.youperfect:id/effect_store_btn', 'id')
+    auto_cut_button = Element(
+        'com.cyberlink.youperfect:id/cutoutAutoMaskBtn', 'id')
 
 
 class eBackgroundPanel:
@@ -344,10 +377,15 @@ class eBackgroundPanel:
 
     forbidden_button = Element(
         'com.cyberlink.youperfect:id/frame_panel_empty_item_image', 'id')
+    unpanel_button = Element(
+        'com.cyberlink.youperfect:id/BottomEraserBtn', 'id')
 
     config_icon = Element('com.cyberlink.youperfect:id/advancedAdjust', 'id')
     feather_button = Element('Feather', 'text')
     blur_button = Element('Blur', 'text')
+    apply_button = Element('com.cyberlink.youperfect:id/toolBarApplyBtn', 'id')
+    save_button = Element(
+        'com.cyberlink.youperfect:id/topToolBarExportBtn', 'id')
 
 
 class eMainPhotoPage:
@@ -400,6 +438,24 @@ class eAddBackgroundPage:
 
 class eChangeBackgroundPage:
     pass
+
+
+class eAddPhotoPage:
+    # Josh
+    add_more_button = Element('com.cyberlink.youperfect:id/layerPlusBtn', 'id')
+    add_photo_button = Element('com.cyberlink.youperfect:id/AddPhotoBtn', 'id')
+    add_text_button = Element('com.cyberlink.youperfect:id/AddTextBtn', 'id')
+    add_stickers_button = Element(
+        'com.cyberlink.youperfect:id/AddStickerBtn', 'id')
+    crop_reset_button = Element('com.cyberlink.youperfect:id/resetBtn', 'id')
+    duplicate_button = Element(
+        'com.cyberlink.youperfect:id/layerDuplicateBtn', 'id')
+    undo_button = Element('com.cyberlink.youperfect:id/EditViewUndoBtn', 'id')
+    redo_button = Element('com.cyberlink.youperfect:id/EditViewRedoBtn', 'id')
+    yes_button = Element(
+        'com.cyberlink.youperfect:id/alertDialog_buttonPositive', 'id')
+    no_button = Element(
+        'com.cyberlink.youperfect:id/alertDialog_buttonNegative', 'id')
 
 
 class eTemplatePage:

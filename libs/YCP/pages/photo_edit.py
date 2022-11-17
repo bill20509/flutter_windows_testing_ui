@@ -1,9 +1,82 @@
+from ast import Num
+from numpy import int0
 from libs.YCP import pages
 from libs.YCP.locator import *
 
 
 class feature:
     pass
+
+
+class EditFeatureRoom(pages.YCP_base.YCPBase):
+    def __init__(self, driver) -> None:
+        super().__init__(driver)
+
+    def click_close(self):
+        self.click_element(eEditFeatureRoom.close_button)
+        return PhotoEditPage(self.driver)
+
+    def click_apply(self):
+        self.click_element(eEditFeatureRoom.apply_button)
+        return PhotoEditPage(self.driver)
+
+    def click_select_photo(self):
+        self.click_element(eEditFeatureRoom.select_photo_button)
+        return pages.photo_picker.PhotoPickerPage(self.driver)
+
+    def click_leave(self):
+        self.click_element(eEditFeatureRoom.leave_button)
+        return PhotoEditPage(self.driver)
+
+    def click_no_thank(self):
+        self.click_element(eEditFeatureRoom.no_thanks_button)
+        return PhotoEditPage(self.driver)
+
+
+class MainPhotoEraserPage(EditFeatureRoom):
+    def __init__(self, driver) -> None:
+        super().__init__(driver)
+
+    def click_auto_detect(self):
+        self.click_element(eMainPhotoEraserPage.auto_detect_button)
+        return self
+
+    def click_reset(self):
+        self.click_element(eMainPhotoEraserPage.reset_button)
+        return self
+
+    def click_undo(self):
+        self.click_element(eMainPhotoEraserPage.undo_button)
+        return self
+
+    def select_dot_item(self, num: int):
+        self.select_element_by_number(eMosaicPage.dot_item, num)
+        return self
+
+    def click_paint(self):
+        self.click_element(eMainPhotoEraserPage.paint_button)
+        return self
+
+    def click_erase(self):
+        self.click_element(eMosaicPage.erase_button)
+        return self
+
+    def set_hardness(self, num: int):
+        self.send_keys_to_element(seek_bar, num)
+        return self
+
+
+class BeautifyFeatureRoom(pages.YCP_base.YCPBase):
+    def __init__(self, driver) -> None:
+        super().__init__(driver)
+
+    def click_close(self):
+        self.click_element(eEditFeatureRoom.close_button)
+        return PhotoEditPage(self.driver)
+
+    def click_apply(self):
+        self.click_element(eEditFeatureRoom.apply_button)
+        return PhotoEditPage(self.driver)
 
 
 class ColorPickerPanel(pages.YCP_base.YCPBase):
@@ -92,6 +165,10 @@ class BackgroundPanel(pages.YCP_base.YCPBase):
         self.send_keys_to_element(seek_bar, num)
         return self
 
+    def click_save(self):
+        self.click_element(eBackgroundPanel.save_button)
+        return pages.result.ResultPage(self.driver)
+
 
 class MainPhotoPage(ColorPickerPanel):
     def __init__(self, driver):
@@ -147,8 +224,13 @@ class MainPhotoPage(ColorPickerPanel):
         return self
 
     def select_blender_tab(self, blender_mode: str):
-        assert blender_mode in ['NORMAL', 'MUTIPLY',
-                                'SCREEN', 'OVERLAY', 'SOFT LIGHT', 'HARD LIGHT']
+        assert blender_mode in [
+            'NORMAL',
+            'MUTIPLY',
+            'SCREEN',
+            'OVERLAY',
+            'SOFT LIGHT',
+            'HARD LIGHT']
         self.click_element_in_list(blender_mode, eMainPhotoPage.blender_list)
         return self
 
@@ -184,32 +266,6 @@ class PhotoEditTemplate(pages.YCP_base.YCPBase):
     def click_compare(self):
         self.click_element(ePhotoEditTemplate.compare_button)
         return self
-
-
-class EditFeatureRoom(pages.YCP_base.YCPBase):
-    def __init__(self, driver) -> None:
-        super().__init__(driver)
-
-    def click_close(self):
-        self.click_element(eEditFeatureRoom.close_button)
-        return PhotoEditPage(self.driver)
-
-    def click_apply(self):
-        self.click_element(eEditFeatureRoom.apply_button)
-        return PhotoEditPage(self.driver)
-
-
-class BeautifyFeatureRoom(pages.YCP_base.YCPBase):
-    def __init__(self, driver) -> None:
-        super().__init__(driver)
-
-    def click_close(self):
-        self.click_element(eEditFeatureRoom.close_button)
-        return PhotoEditPage(self.driver)
-
-    def click_apply(self):
-        self.click_element(eEditFeatureRoom.apply_button)
-        return PhotoEditPage(self.driver)
 
 
 class PhotoBeautifyPage(PhotoEditTemplate):
@@ -337,12 +393,48 @@ class ToolsPanel(pages.YCP_base.YCPBase):
         self.click_element_by_text(tool_name)
         return ToolsCropRotatePage(self.driver)
 
+    def click_crop_and_rotate(self):
+        self.click_element_by_text('Crop & Rotate')
+        return pages.photo_edit.ToolsCropRotatePage(self.driver)
+
+    def click_perspective(self):
+        self.click_element_by_text('Perspective')
+        return pages.photo_edit.PerspectivePage(self.driver)
+
+    def click_HDR(self):
+        self.click_element_by_text('HDR')
+        return pages.photo_edit.HDRPage(self.driver)
+
+    def click_vignette(self):
+        self.click_element_by_text('Vignette')
+        return pages.photo_edit.VignettePage(self.driver)
+
+    def click_mirror(self):
+        self.click_element_by_text('Mirror')
+        return pages.photo_edit.MirrorPage(self.driver)
+
+    def click_blur(self):
+        self.click_element_by_text('Blur')
+        return pages.photo_edit.BlurPage(self.driver)
+
+    def click_mosaic(self):
+        self.click_element_by_text('Mosaic')
+        return pages.photo_edit.MosaicPage(self.driver)
+
+    def click_vignette(self):
+        self.click_element_by_text('Cutout')
+        return pages.photo_edit.CutOutPage(self.driver)
+
+    def click_clone(self):
+        self.click_element_by_text('Clone')
+        return pages.photo_edit.ClonePage(self.driver)
+
 
 class ToolsCropRotatePage(EditFeatureRoom):
     def __init__(self, driver) -> None:
         super().__init__(driver)
 
-    def click_image_roate(self):
+    def click_image_rotate(self):
         self.click_element(eToolsCropRotatePage.image_roate)
         return self
 
@@ -630,9 +722,13 @@ class ClonePage(EditFeatureRoom):
         return self
 
 
-class EffectPage(EditFeatureRoom):
+class EffectPage(MainPhotoEraserPage):
     def __init__(self, driver):
         super().__init__(driver)
+
+    def click_fold(self):
+        self.click_element(eEffectPage.fold_button)
+        return self
 
     def scroll_animation_catogory_list(self):
         self.scroll_horizontal(eEffectPage.animation_catogory_list)
@@ -654,7 +750,7 @@ class EffectPage(EditFeatureRoom):
         self.click_element(eEffectPage.pause_button)
         return self
 
-    def click_erase(self):
+    def click_erase_panel(self):
         self.click_element(eEffectPage.erase_button)
         return self
 
@@ -671,7 +767,11 @@ class EffectPage(EditFeatureRoom):
         return pages.store.StorePage(self.driver)
 
     def select_filter_item(self, num: int):
-        self.select_element_by_number(eEffectPage.effect_panel_item, num)
+        self.select_element_by_number(eEffectPage.filter_item, num)
+        return self
+
+    def select_filter_item_to_favorite(self, num: int):
+        self.longpress_select_element_by_number(eEffectPage.filter_item, num)
         return self
 
     def select_filter(self, feature_name: str):
@@ -679,7 +779,7 @@ class EffectPage(EditFeatureRoom):
             try:
                 self.click_element_by_text(feature_name)
                 break
-            except:
+            except BaseException:
                 self.scroll_horizontal(eEffectPage.effect_list)
         return self
 
@@ -688,7 +788,7 @@ class EffectPage(EditFeatureRoom):
             try:
                 self.click_element_by_text(feature_name)
                 break
-            except:
+            except BaseException:
                 self.scroll_horizontal(eEffectPage.animation_catogory_list)
         return self
 
@@ -717,10 +817,36 @@ class EffectPage(EditFeatureRoom):
         self.click_element(eEffectPage.filter_tab)
         return self
 
+    def click_adjust_panel(self):
+        self.click_element(eEffectPage.adjust_panel_button)
+        return self
 
-class AnimationPage(EditFeatureRoom):
+
+class AnimationPage(MainPhotoEraserPage):
     def __init__(self, driver):
         super().__init__(driver)
+    # 有部分直接copy effect page/animation
+
+    def select_animation_category(self, feature_name: str):
+        for i in range(5):
+            try:
+                self.click_element_by_text(feature_name)
+                break
+            except BaseException:
+                self.scroll_horizontal(eEffectPage.animation_catogory_list)
+        return self
+
+    def select_animation_item(self, num: int):
+        self.select_element_by_number(eEffectPage.animation_item, num)
+        return self
+
+    def click_adjust_panel(self):
+        self.click_element(eEffectPage.adjust_panel_button)
+        return self
+
+    def wait_progress_bar(self):
+        self.wait_loading_panel()
+        return self
 
     def click_wraparounds_tab(self):
         self.click_element(eAnimationPage.wraparounds_tab)
@@ -732,6 +858,31 @@ class AnimationPage(EditFeatureRoom):
 
     def click_effects_tab(self):
         self.click_element(eAnimationPage.effects_tab)
+        return self
+
+    def select_animation_item(self, num=int):
+        self.select_element_by_number(eAnimationPage.animation_item, num)
+        return self
+
+    def click_forbidden(self):
+        self.click_element(eAnimationPage.forbidden_button)
+        return self
+
+    def set_speed_bar(self, speed=float):
+        assert speed in [0.5, 1, 2]
+        self.send_keys_to_element(eAnimationPage.speed_bar, speed)
+        return self
+
+    def click_capture(self):
+        self.click_element(eAnimationPage.capture_button)
+        return self
+
+    def click_play(self):
+        self.click_element(eEffectPage.play_button)
+        return self
+
+    def click_pause(self):
+        self.click_element(eEffectPage.pause_button)
         return self
 
 
@@ -753,6 +904,10 @@ class RemovalPage(EditFeatureRoom):
 
     def click_eraser(self):
         self.click_element(eRemovalPage.eraser_button)
+        return self
+
+    def click_i(self):
+        self.click_element(eRemovalPage.i_button)
         return self
 
     def click_paint(self):
@@ -777,8 +932,9 @@ class AdjustPage(EditFeatureRoom):
             try:
                 self.click_element_by_text(feature_name)
                 break
-            except:
+            except BaseException:
                 self.scroll_horizontal(eAdjustPage.feature_list)
+        return self
 
     def set_intensity_value(self, num: int):
         self.send_keys_to_element(eAdjustPage.intensity_bar, num)
@@ -806,7 +962,9 @@ class MagicBrushPage(EditFeatureRoom):
         return self
 
 
-class StickerPage(EditFeatureRoom, ColorPickerPanel):
+class StickerPage(EditFeatureRoom,
+                  ColorPickerPanel,
+                  eCutOutPage):
     def __init__(self, driver) -> None:
         super().__init__(driver)
 
@@ -846,8 +1004,29 @@ class StickerPage(EditFeatureRoom, ColorPickerPanel):
         self.select_element_by_number(eStickerPage.sticker_panel_item, num)
         return self
 
+    def select_album_item(self, name: str):
+        self.click_element_by_text(name)
+        return self
 
-class InstaFitPage(EditFeatureRoom, ColorPickerPanel, RatioPanel, BackgroundPanel):
+    def select_photo_item(self, num: int):
+        self.select_element_by_number(ePhotoPickerPage.photo_item, num)
+        # TODO: probably need to specify which page be returnd
+        return AddBackgroundPage(self.driver)
+
+    def click_auto_cut(self):
+        self.click_element(eStickerPage.auto_cut_button)
+        return self
+
+    def click_apply(self):
+        self.click_element(eEditFeatureRoom.apply_button)
+        return StickerPage(self.driver)
+
+
+class InstaFitPage(
+        EditFeatureRoom,
+        ColorPickerPanel,
+        RatioPanel,
+        BackgroundPanel):
     def __init__(self, driver) -> None:
         super().__init__(driver)
 
@@ -857,31 +1036,6 @@ class InstaFitPage(EditFeatureRoom, ColorPickerPanel, RatioPanel, BackgroundPane
 
     def click_main_photo(self):
         self.click_element(eInstaFitPage.main_photo)
-        return self
-
-
-class MainPhotoEraserPage(EditFeatureRoom):
-    def __init__(self, driver) -> None:
-        super().__init__(driver)
-
-    def click_auto_detect(self):
-        self.click_element(eMainPhotoEraserPage.auto_detect_button)
-        return self
-
-    def click_reset(self):
-        self.click_element(eMainPhotoEraserPage.reset_button)
-        return self
-
-    def click_undo(self):
-        self.click_element(eMainPhotoEraserPage.undo_button)
-        return self
-
-    def select_dot_item(self):
-        self.select_element_by_number(eMainPhotoEraserPage.dot_item)
-        return self
-
-    def click_paint(self):
-        self.click_element(eMainPhotoEraserPage.paint_button)
         return self
 
 
@@ -899,6 +1053,10 @@ class FramePage(EditFeatureRoom):
 
     def select_frame_item(self, frame_name: str):
         self.click_element_in_list(frame_name, eFramePage.frame_list)
+        return self
+
+    def select_single_frame_item(self, num: int):
+        self.select_element_by_number(eFramePage.frame_list, num)
         return self
 
 
@@ -919,12 +1077,45 @@ class BackgroundPage(EditFeatureRoom):
         return PhotoEditPage(self.driver)
 
 
-class AddBackgroundPage(EditFeatureRoom, RatioPanel, ColorPickerPanel, BackgroundPanel):
+class AddBackgroundPage(
+        EditFeatureRoom,
+        RatioPanel,
+        ColorPickerPanel,
+        BackgroundPanel):
     def __init__(self, driver) -> None:
         super().__init__(driver)
 
     def set_blur_slider_bar(self, value: int):
         self.send_keys_to_element(seek_bar, value)
+        return self
+
+    def select_tab(self, tab_name: str):
+        self.click_element_by_text(tab_name)
+        return self
+
+    def click_apply(self):
+        self.click_element(eEditFeatureRoom.apply_button)
+        return AddBackgroundPage(self.driver)
+
+    def set_slider_bar(self, num: int):
+        self.send_keys_to_element(seek_bar, num)
+        return self
+
+    def select_background_item(self, num: int):
+        self.select_element_by_number(eBackgroundPanel.background_item, num)
+        return self
+
+    def select_album_item(self, name: str):
+        self.click_element_by_text(name)
+        return self
+
+    def select_photo_item(self, num: int):
+        self.select_element_by_number(ePhotoPickerPage.photo_item, num)
+        # TODO: probably need to specify which page be returnd
+        return AddBackgroundPage(self.driver)
+
+    def click_auto_cut(self):
+        self.click_element(eStickerPage.auto_cut_button)
         return self
 
 
@@ -936,15 +1127,240 @@ class TemplatePage(EditFeatureRoom):
         self.click_element(eTemplatePage.store_button)
         return pages.store.StorePage(self.driver)
 
+    def select_tab(self, tab_name: str):
+        self.click_element_by_text(tab_name)
+        return self
 
-class ChangeBackgroundPage(EditFeatureRoom):
+
+class ChangeBackgroundPage(EditFeatureRoom, BackgroundPanel, ColorPickerPanel):
     def __init__(self, driver) -> None:
         super().__init__(driver)
+
+    def click_blur(self):
+        self.click_element(eBackgroundPanel.blur_button)
+        return self
+
+    def click_feather(self):
+        self.click_element(eBackgroundPanel.feather_button)
+        return self
+
+    def click_config_icon(self):
+        self.click_element(eBackgroundPanel.config_icon)
+        return self
+
+    def click_forbidden(self):
+        self.click_element(eBackgroundPanel.forbidden_button)
+        return self
+
+    def scroll_background_list(self):
+        self.click_element(eBackgroundPanel.background_list)
+        return self
+
+    def click_store(self):
+        self.click_element(eBackgroundPanel.store_button)
+        return pages.store.StorePage(self.driver)
+
+    def click_library_icon(self):
+        self.click_element(eBackgroundPanel.library_icon)
+        return pages.photo_picker.PhotoPickerPage(self.driver)
+
+    def select_background_item(self, num: int):
+        self.select_element_by_number(eBackgroundPanel.background_item, num)
+        return self
+
+    def set_slider_bar(self, num: int):
+        self.send_keys_to_element(seek_bar, num)
+        return self
+
+    def unfold_panel_button(self):
+        self.click_element(eBackgroundPanel.unpanel_button)
+        return ChangeBackgroundPage(self.driver)
+
+    def click_apply(self):
+        self.click_element(eBackgroundPanel.apply_button)
+        return ChangeBackgroundPage(self.driver)
+
+    def select_tab(self, tab_name: str):
+        self.click_element_by_text(tab_name)
+        return self
 
 
 class AddPhotoPage(EditFeatureRoom):
+    # Josh
     def __init__(self, driver) -> None:
         super().__init__(driver)
+
+    def select_album_item(self, name: str):
+        self.click_element_by_text(name)
+        return self
+
+    def select_photo_item(self, num: int):
+        self.select_element_by_number(ePhotoPickerPage.photo_item, num)
+        return self
+
+    def click_v(self):
+        self.click_element(ePhotoPickerPage.v_button)
+        return self
+
+    def click_add_more(self):
+        self.click_element(eAddPhotoPage.add_more_button)
+        return self
+
+    def click_add_photo(self):
+        self.click_element(eAddPhotoPage.add_photo_button)
+        return self
+
+    def click_add_text(self):
+        self.click_element(eAddPhotoPage.add_text_button)
+        return self
+
+    def click_add_stickers(self):
+        self.click_element(eAddPhotoPage.add_stickers_button)
+        return self
+
+    def click_opacity(self):
+        self.click_element(eMainPhotoPage.opacity_button)
+        return self
+
+    def set_slider_bar(self, num: int):
+        self.send_keys_to_element(seek_bar, num)
+        return self
+
+    def click_border(self):
+        self.click_element(eMainPhotoPage.border_button)
+        return self
+
+    def select_color_item(self, num: int):
+        self.select_element_by_number(eColorPickerPanel.color_item, num)
+        return self
+
+    def select_tool_item(self, num: int):
+        self.select_element_by_number(eColorPickerPanel.tool_item, num)
+        return self
+
+    def click_add_color(self):
+        self.click_element(eColorPickerPanel.add_color)
+        return self
+
+    def set_intensity_value(self, num: int):
+        self.send_keys_to_element(eAdjustPage.intensity_bar, num)
+        return self
+
+    def click_blender(self):
+        self.click_element(eMainPhotoPage.blender_button)
+        return self
+
+    def select_blender_tab(self, blender_mode: str):
+        assert blender_mode in [
+            'NORMAL',
+            'MULTIPLY',
+            'SCREEN',
+            'OVERLAY',
+            'SOFT LIGHT',
+            'HARD LIGHT']
+        self.click_element_in_list(blender_mode, eMainPhotoPage.blender_list)
+        return self
+
+    def click_adjust(self):
+        self.click_element_in_list(
+            eMainPhotoPage.adjust_button, eMainPhotoPage.tools_list)
+        return AdjustPage(self.driver)
+
+    def click_effects(self):
+        self.click_element_in_list(
+            eMainPhotoPage.effects_button, eMainPhotoPage.tools_list)
+        return EffectPage(self.driver)
+
+    def click_eraser(self):
+        self.click_element_in_list(
+            eMainPhotoPage.eraser_button, eMainPhotoPage.tools_list)
+        return self
+
+    def click_auto_detect(self):
+        self.click_element(eMainPhotoEraserPage.auto_detect_button)
+        return self
+
+    def click_reset(self):
+        self.click_element(eMainPhotoEraserPage.reset_button)
+        return self
+
+    def click_eraser_undo(self):
+        self.click_element(eMainPhotoEraserPage.undo_button)
+        return self
+
+    def select_dot_item(self, num):
+        self.select_element_by_number(eMainPhotoEraserPage.dot_item, num)
+        return self
+
+    def click_crop_and_rotate(self):
+        self.click_element_in_list(
+            eMainPhotoPage.crop_and_rotate, eMainPhotoPage.tools_list)
+        return self
+
+    def click_image_rotate(self):
+        self.click_element(eToolsCropRotatePage.image_roate)
+        return self
+
+    def rotate_slidebar_to_45(self):
+        self.slidebar_to_right(eToolsCropRotatePage.slide_bar)
+        return self
+
+    def click_image_mirror(self):
+        self.click_element(eToolsCropRotatePage.image_mirror_button)
+        return self
+
+    def click_crop_reset(self):
+        self.click_element(eAddPhotoPage.crop_reset_button)
+        return self
+
+    def click_image_2x3(self):
+        self.click_element(eToolsCropRotatePage.image_2x3_button)
+        return self
+
+    def click_cutout(self):
+        self.click_element_in_list(
+            eMainPhotoPage.cutout_button, eMainPhotoPage.tools_list)
+        return MainPhotoEraserPage(self.driver)
+
+    def click_duplicate(self):
+        self.click_element(eAddPhotoPage.duplicate_button)
+        return self
+
+    def select_sticker_panel_item(self, num: int):
+        self.select_element_by_number(eStickerPage.sticker_panel_item, num)
+        return self
+
+    def click_undo(self):
+        self.click_element(eAddPhotoPage.undo_button)
+        return self
+
+    def click_redo(self):
+        self.click_element(eAddPhotoPage.redo_button)
+        return self
+
+    def click_layer_down(self):
+        self.click_element(eStickerPage.layer_down_button)
+        return self
+
+    def click_layer_up(self):
+        self.click_element(eStickerPage.layer_up_button)
+        return self
+
+    def click_add_photo_apply(self):
+        self.click_element(eEditFeatureRoom.apply_button)
+        return self
+
+    def click_add_photo_close(self):
+        self.click_element(eEditFeatureRoom.close_button)
+        return self
+
+    def click_dialog_yes(self):
+        self.click_element(eAddPhotoPage.yes_button)
+        return PhotoEditPage(self.driver)
+
+    def click_dialog_no(self):
+        self.click_element(eAddPhotoPage.no_button)
+        return self
 
 
 class TextPage(EditFeatureRoom):
@@ -984,7 +1400,7 @@ class BrushPage(EditFeatureRoom):
         self.click_element(eBrushPage.size_tab)
         return self
 
-    def select_select_color_item(self, num: int):
+    def select_color_item(self, num: int):
         self.select_element_by_number(eBrushPage.select_color_item, num)
         return self
 
