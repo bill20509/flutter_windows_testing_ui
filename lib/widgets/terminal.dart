@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:pty/pty.dart';
-import 'package:xterm/flutter.dart';
 import 'package:xterm/xterm.dart';
 
 class LocalTerminalBackend extends TerminalBackend {

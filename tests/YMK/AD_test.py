@@ -19,7 +19,18 @@ class Test(object):
             .set_newcommand_timeout(9999) \
             .create()
         self.app = YMKbase(self.driver)
-
+    @pytest.mark.A
+    @pytest.mark.N1
+    def test_ad_aging_result_pageee(self, extra):
+        result_ad = self.app.deeplink_to_launcher() \
+            .click_aging_tile() \
+            .click_tryit() \
+            .choose_photo() \
+            .click_bipa_agree() \
+            .pick_photo(album_name1, 1) \
+            .wait_animation() \
+            .screenshot("test_ad_aging_result_page", wait_time=3) \
+            .check_result_page_ad()
     @pytest.mark.A
     @pytest.mark.N1
     def test_ad_aging_result_page(self, extra):

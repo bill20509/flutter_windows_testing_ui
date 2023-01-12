@@ -1,24 +1,31 @@
-import 'dart:isolate';
-
 import 'package:example/widgets/fail_icon.dart';
 import 'package:example/widgets/search_list.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:io';
-
+import 'dart:async';
+import 'dart:convert';
 import 'package:example/widgets/item_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'dart:async';
-import 'package:pty/pty.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_pty/flutter_pty.dart';
 import 'models/test_case.dart';
-import 'package:xterm/xterm.dart';
-import 'widgets/terminal.dart';
-import 'dart:convert';
-import 'package:badges/badges.dart';
 import 'package:flutter_json_viewer/flutter_json_viewer.dart';
+import 'package:xterm/xterm.dart';
+import 'package:example/widgets/xterm_mac.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
+}
+
+bool get isDesktop {
+  if (kIsWeb) return false;
+  return [
+    TargetPlatform.windows,
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+  ].contains(defaultTargetPlatform);
 }
 
 class MyApp extends StatelessWidget {
@@ -77,11 +84,11 @@ class _MyHomePageState extends State<MyHomePage> {
   int failCount = 0;
   String tempJsonFileName = 'fail_json.temp';
   int mode = 0; // 0 -> YCP, 1 -> YMK
-  final pty = PseudoTerminal.start(
-    r'C:\windows\system32\WindowsPowerShell\v1.0\powershell.exe',
-    [''],
-    environment: {'TERM': 'xterm-256color'},
+  late final Pty pty;
+  final terminal = Terminal(
+    maxLines: 10000,
   );
+  bool light = true;
   void _runTest() {
     if (queue2.isEmpty) return;
     setState(() {
@@ -93,12 +100,12 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         }
       }
-      pty.write("${test_command}\r");
+      pty.write(Utf8Encoder().convert("${test_command}\r"));
     });
   }
 
   void _parse() {
-    pty.write("${pythonName} parse.py\r");
+    pty.write(Utf8Encoder().convert("${pythonName} parse.py\r"));
   }
 
   void _loadTestCase(bool checked) {
@@ -106,6 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
     queue2 = [];
     isCheckedList = [];
     String contents = "";
+
     try {
       if (mode == 0) {
         contents = File('./YCP_cases.json').readAsStringSync();
@@ -128,9 +136,40 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {}
   }
 
+  void _startPty() {
+    pty = Pty.start(
+      shell,
+      columns: terminal.viewWidth,
+      rows: terminal.viewHeight,
+    );
+
+    pty.output
+        .cast<List<int>>()
+        .transform(Utf8Decoder())
+        .listen(terminal.write);
+
+    pty.exitCode.then((code) {
+      terminal.write('the process exited with exit code $code');
+    });
+
+    terminal.onOutput = (data) {
+      pty.write(const Utf8Encoder().convert(data));
+    };
+
+    terminal.onResize = (w, h, pw, ph) {
+      pty.resize(h, w);
+    };
+  }
+
   @override
   void initState() {
     super.initState();
+    _startPty();
+    // WidgetsBinding.instance.endOfFrame.then(
+    //   (_) {
+    //     if (mounted) _startPty();
+    //   },
+    // );
     _controller = TextEditingController(text: 'python3');
     _controller2 = TextEditingController();
     pythonName = _controller.text;
@@ -171,8 +210,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 suffixIcon: IconButton(
                   onPressed: () async {
                     var app_name = mode == 0 ? "YCP" : "YMK";
-                    pty.write(
-                        "${_controller.text} -m pytest tests/${app_name}/ -m \"${_controller2.text}\" --collectonly -q --disable-warnings > search.temp\r");
+                    final String command =
+                        "${_controller.text} -m pytest tests/${app_name}/ -m \"${_controller2.text}\" --collectonly -q --disable-warnings > search.temp\r";
+                    pty.write(Utf8Encoder().convert(command));
                     final result = await showDialog<List<String>>(
                       context: context,
                       builder: (context) {
@@ -184,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       for (var i in result) {
                         test_command += "$i ";
                       }
-                      pty.write("$test_command\r");
+                      terminal.write("$test_command\r");
                     } else {
                       print('cancel');
                     }
@@ -398,6 +438,23 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
           ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Switch(
+                // This bool value toggles the switch.r
+                value: light,
+                activeColor: Colors.white,
+                onChanged: (bool value) {
+                  // This is called when the user toggles the switch.
+                  setState(() {
+                    light = value;
+                  });
+                },
+              ),
+              Text('Android'),
+            ],
+          ),
           Container(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -558,6 +615,7 @@ class _MyHomePageState extends State<MyHomePage> {
             queue1,
             queue2,
             isCheckedList,
+            terminal,
             pty,
           ),
         ),
@@ -579,12 +637,14 @@ class Body extends StatefulWidget {
     List<TestCase> this.q1,
     List<TestCase> this.q2,
     List<bool> this.isCheckedList,
-    PseudoTerminal this.pty, {
+    Terminal this.terminal,
+    Pty this.pty, {
     Key? key,
   }) : super(key: key);
   final List<TestCase> q1;
   final List<TestCase> q2;
-  final PseudoTerminal pty;
+  final Terminal terminal;
+  final Pty pty;
   final List<bool> isCheckedList;
   @override
   State<Body> createState() => _BodyState();
@@ -594,6 +654,12 @@ class _BodyState extends State<Body> {
   final ScrollController _firstController = ScrollController();
   final ScrollController _secondController = ScrollController();
   bool selectAll = true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     refreshList(widget.q1, widget.q2);
@@ -719,7 +785,7 @@ class _BodyState extends State<Body> {
           ),
           SizedBox(
             width: constraints.maxWidth * 2.8 / 5,
-            child: LocalTerminal(widget.pty),
+            child: xterm(widget.pty, widget.terminal),
           ),
         ],
       );

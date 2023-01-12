@@ -23,31 +23,34 @@ class _SearchListState extends State<SearchList> {
     _everySecond = Timer.periodic(Duration(seconds: 1), (Timer t) {
       try {
         var f = File("search.temp");
-        var bytes = f.readAsBytesSync();
-        var utf16CodeUnits = bytes.buffer.asUint16List();
-
-        var s = String.fromCharCodes(utf16CodeUnits);
+        var contents = f.readAsStringSync();
+        // var bytes = f.readAsBytesSync();
+        // var utf16CodeUnits = bytes.buffer.asUint16List();
+        // print(contents);
+        // var s = String.fromCharCodes(utf16CodeUnits);
         // print(s);
         LineSplitter ls = new LineSplitter();
-        List<String> _masForUsing = ls.convert(s);
-        for (var i = 0; i < _masForUsing.length; i++) {
-          _masForUsing[i] =
-              _masForUsing[i].replaceAll(RegExp(r'[^a-zA-Z0-9_\/:\.]+'), '');
-          // print('${i} ${_masForUsing[i]}');
-        }
-        _masForUsing.sort();
-        setState(() {
-          content = _masForUsing;
-          resultList = [];
-          for (var i in content) {
-            if (i.startsWith('tests')) {
-              count += 1;
-              resultList.add(i);
-            } else if (i.startsWith('no')) {
-              resultList.add('No test founded');
-            }
-          }
-        });
+        // List<String> _masForUsing = ls.convert(contents);
+        print(contents);
+        // for (var i = 0; i < _masForUsing.length; i++) {
+        //   _masForUsing[i] =
+        //       _masForUsing[i].replaceAll(RegExp(r'[^a-zA-Z0-9_\/:\.]+'), '');
+        //   // print('${i} ${_masForUsing[i]}');
+        // }
+        // _masForUsing.sort();
+
+        // setState(() {
+        //   content = _masForUsing;
+        //   resultList = [];
+        //   for (var i in content) {
+        //     if (i.startsWith('tests')) {
+        //       count += 1;
+        //       resultList.add(i);
+        //     } else if (i.startsWith('no')) {
+        //       resultList.add('No test founded');
+        //     }
+        //   }
+        // });
       } on Exception catch (e) {
         print(e);
       }
