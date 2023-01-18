@@ -2,14 +2,14 @@ from os import listdir
 from os.path import isfile, join
 import json
 from importlib.machinery import SourceFileLoader
+import sys
 
-
-def parse(name):
-    mypath = './tests/' + name + '/'
+def parse(name, platform):
+    mypath = './tests/' + platform + '/'+ name + '/'
     files = [f for f in listdir(mypath) if isfile(join(mypath, f))]
     test_case = []
     for file_name in files:
-        if(file_name.startswith('_')):
+        if(file_name.startswith('_') or file_name.startswith('.')):
             continue
         item = {"case_name": file_name, "path": mypath + file_name, "class": "Test",
                 "cases": []}
@@ -26,7 +26,10 @@ def parse(name):
     with open(name + "_cases.json", "w") as outfile:
         json.dump(test_case, outfile)
 
-
-parse('YCP')
-parse('YMK')
+try:
+    platform = sys.argv[1]
+except:
+    platform = "Android"
+parse('YCP',platform)
+parse('YMK',platform)
 print('Reload ready')

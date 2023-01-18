@@ -82,6 +82,7 @@ class _HomeState extends State<Home> {
 
 String get shell {
   if (Platform.isMacOS || Platform.isLinux) {
+    // return 'bash';
     return Platform.environment['SHELL'] ?? 'bash';
   }
 

@@ -13,6 +13,7 @@ import 'models/test_case.dart';
 import 'package:flutter_json_viewer/flutter_json_viewer.dart';
 import 'package:xterm/xterm.dart';
 import 'package:example/widgets/xterm_mac.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -81,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late TextEditingController _controller;
   late TextEditingController _controller2;
   late String pythonName;
+  String pwd = "";
   int failCount = 0;
   String tempJsonFileName = 'fail_json.temp';
   int mode = 0; // 0 -> YCP, 1 -> YMK
@@ -88,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final terminal = Terminal(
     maxLines: 10000,
   );
-  bool light = true;
+  bool isAndroid = false;
   void _runTest() {
     if (queue2.isEmpty) return;
     setState(() {
@@ -105,7 +107,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _parse() {
-    pty.write(Utf8Encoder().convert("${pythonName} parse.py\r"));
+    final platform = isAndroid ? "Android" : "iOS";
+    pty.write(Utf8Encoder().convert("${pythonName} parse.py ${platform}\r"));
   }
 
   void _loadTestCase(bool checked) {
@@ -116,9 +119,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     try {
       if (mode == 0) {
-        contents = File('./YCP_cases.json').readAsStringSync();
+        contents = File(p.join(pwd, './YCP_cases.json')).readAsStringSync();
       } else if (mode == 1) {
-        contents = File('./YMK_cases.json').readAsStringSync();
+        contents = File(p.join(pwd, './YMK_cases.json')).readAsStringSync();
       }
       List<dynamic> test_cases = jsonDecode(contents);
       for (var i in test_cases) {
@@ -143,10 +146,14 @@ class _MyHomePageState extends State<MyHomePage> {
       rows: terminal.viewHeight,
     );
 
-    pty.output
-        .cast<List<int>>()
-        .transform(Utf8Decoder())
-        .listen(terminal.write);
+    pty.output.cast<List<int>>().transform(Utf8Decoder()).listen(
+      (event) {
+        terminal.write(event);
+        if (event.startsWith('/Users/')) {
+          pwd = event.trim();
+        }
+      },
+    );
 
     pty.exitCode.then((code) {
       terminal.write('the process exited with exit code $code');
@@ -161,18 +168,19 @@ class _MyHomePageState extends State<MyHomePage> {
     };
   }
 
+  void _cd() {
+    pty.write(const Utf8Encoder().convert(r'echo ${TEST_UI_PATH}' + '\r'));
+    pty.write(const Utf8Encoder().convert(r'cd ${TEST_UI_PATH}' + '\r'));
+  }
+
   @override
   void initState() {
     super.initState();
     _startPty();
-    // WidgetsBinding.instance.endOfFrame.then(
-    //   (_) {
-    //     if (mounted) _startPty();
-    //   },
-    // );
     _controller = TextEditingController(text: 'python3');
     _controller2 = TextEditingController();
     pythonName = _controller.text;
+    _cd();
     _parse();
     _loadTestCase(true);
     refreshList(queue1, queue2);
@@ -210,8 +218,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 suffixIcon: IconButton(
                   onPressed: () async {
                     var app_name = mode == 0 ? "YCP" : "YMK";
+                    final platform = isAndroid ? "Android" : "iOS";
                     final String command =
-                        "${_controller.text} -m pytest tests/${app_name}/ -m \"${_controller2.text}\" --collectonly -q --disable-warnings > search.temp\r";
+                        "${_controller.text} -m pytest ${pwd}/tests/${platform}/${app_name}/ -m \"${_controller2.text}\" --collectonly -q --disable-warnings > search.temp\r";
                     pty.write(Utf8Encoder().convert(command));
                     final result = await showDialog<List<String>>(
                       context: context,
@@ -224,7 +233,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       for (var i in result) {
                         test_command += "$i ";
                       }
-                      terminal.write("$test_command\r");
+                      pty.write(Utf8Encoder().convert("$test_command\r"));
                     } else {
                       print('cancel');
                     }
@@ -443,16 +452,17 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               Switch(
                 // This bool value toggles the switch.r
-                value: light,
+                value: isAndroid,
                 activeColor: Colors.white,
                 onChanged: (bool value) {
                   // This is called when the user toggles the switch.
                   setState(() {
-                    light = value;
+                    isAndroid = value;
+                    _parse();
                   });
                 },
               ),
-              Text('Android'),
+              if (isAndroid) Text('Android') else Text('iOS'),
             ],
           ),
           Container(
@@ -461,13 +471,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 minimumSize: Size.zero, // Set this
                 padding: EdgeInsets.zero, // and this
               ),
-              child: FailIcon(tempJsonFileName: tempJsonFileName),
+              child: FailIcon(tempJsonFileName: p.join(pwd, tempJsonFileName)),
               onPressed: () async {
                 final result = await showDialog<String>(
                   context: context,
                   builder: (BuildContext context) {
                     try {
-                      final contents = File(tempJsonFileName).readAsLinesSync();
+                      final contents =
+                          File(p.join(pwd, tempJsonFileName)).readAsLinesSync();
 
                       List<Map<String, dynamic>> failCases = [];
                       for (final item in contents) {
@@ -551,7 +562,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
                 if (result == 'OK') {
                   setState(() {
-                    final contents = File(tempJsonFileName).readAsLinesSync();
+                    final contents =
+                        File(p.join(pwd, tempJsonFileName)).readAsLinesSync();
 
                     List<Map<String, dynamic>> failCases = [];
                     for (final item in contents) {
